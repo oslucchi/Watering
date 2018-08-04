@@ -1,0 +1,44 @@
+#!/bin/bash
+#
+### BEGIN INIT INFO
+# Provides:          watering
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Should-Start:      $network $named $time
+# Should-Stop:       $network $named $time
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start and stop the watering system
+# Description:       Controls the run of the watering system
+### END INIT INFO
+#
+
+
+#
+# main()
+#
+
+case "${1:-''}" in
+
+  'start')
+	cd /opt/watering
+	java -cp . it.lsoft.watering.Watering Watering.ini &
+  ;;
+
+  'stop')
+	/opt/watering/bin/shutdown
+	sleep 5
+	echo down
+  ;;
+
+  'restart')
+  $SELF stop 
+  shift
+  $SELF start "${@}"
+  ;;
+
+  *)
+  echo "Usage: $SELF start|stop|restart"
+  exit 1
+  ;;
+esac

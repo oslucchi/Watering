@@ -1,0 +1,5 @@
+#!/usr/bin/expect
+set timeout 10
+spawn telnet localhost 9898
+        expect "Watering admin> "
+        send shutdown\r
