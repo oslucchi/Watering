@@ -328,6 +328,11 @@ public class AdminCommands extends Thread
 									wr.write("malformed date specified '" + inputParm + "\n");
 								} 
 							}
+							else
+							{
+								wr.write("last watering session time set is: " + rtData.getLastWateringSession() + "\n");
+								wr.write("ACK\n");								
+							}
 							break;
 
 						case "help":
