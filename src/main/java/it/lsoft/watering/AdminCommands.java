@@ -106,64 +106,6 @@ public class AdminCommands extends Thread
 						logger.trace("handling command '" + command + "'");
 						switch(command)
 						{
-						case "shutdown":
-							wr.write("ACK-M\n");
-							wr.write("\n\tShutting down .....\n");
-							wr.write("ACK-ENDM\n");
-							wr.flush();
-							clientSocket.close();
-							rtData.setShutDown(true);
-							logger.debug("Shutting the system down");
-							return;
-
-						case "seterr":
-							if (st.hasMoreTokens())
-							{
-								String inputParm = st.nextToken();
-								try
-								{
-									int errorCode = Integer.parseInt(inputParm);
-									rtData.setErrorCode(errorCode);
-									wr.write("ACK\n");
-								}
-								catch(NumberFormatException e)
-								{
-									wr.write("NACK\n");
-									wr.write("malformatted error code '" + inputParm + "\n");
-								}
-							}
-							break;
-
-						case "start":
-							isStartCmd = true;
-						case "stop":
-							if (st.hasMoreTokens())
-							{
-								String inputParm = st.nextToken();
-								try
-								{
-									int zone = Integer.parseInt(inputParm);
-									if ((zone >= 0) && (parms.getZones() > zone))
-									{
-										rtData.setValveStatus(zone, isStartCmd);
-										wr.write("ACK\n");
-									}
-									else
-									{
-										wr.write("NACK\n");
-										wr.write("invalid zone. Valid ids are from 0 to " + 
-												 (parms.getZones() - 1) + "\n");
-
-									}
-								}
-								catch(NumberFormatException e)
-								{
-									wr.write("NACK\n");
-									wr.write("malformatted zone'" + inputParm + "\n");
-								}
-							}
-							break;
-							
 						case "disable":
 							rtData.setDisableFlag(true);
 							wr.write("ACK\n");
@@ -174,40 +116,29 @@ public class AdminCommands extends Thread
 							wr.write("ACK\n");
 							wr.write("Re-evaluated next start time to " + rtData.getNextStartTime());
 							break;
+							
+						case "suspend":
+							rtData.setSuspendFlag(true);
+							wr.write("Ssuspend flag is now: " + rtData.isSuspendFlag() + "\n");
+							wr.write("ACK\n");
+							break;
 
-						case "status":
-							wr.write("ACK-M\n");
-							wr.write("\tNext startup at: " + rtData.getNextStartTime() + "\n");
-							wr.write("\tHumidity from sensors:\n");
-							for(int i = 0; i < parms.getNumberOfSensors(); i++)
-							{
-								wr.write("\t\tSensor " + i + " " + String.format("%2.2f", rtData.getMoisture(i)) + "\n");
-							}
-							wr.write("\tWatering is " + 
-									(rtData.getInCycle() < 0 ? "inactive\n" : "active on zone " + rtData.getInCycle() + ":\n"));
-							if (rtData.getInCycle() >= 0 )
-							{
-								for(int i = 0; i < parms.getZones(); i++)
-								{
-									wr.write("\t\tZone " + i + " " + 
-											 (rtData.getValveStatus(i) ? "watering" : "   off  ") + 
-											 (rtData.getValveStatus(i) ? " since " + rtData.getWateringTimeElapsed(i) + " sec" : "") +  "\n");
-								}
-							}
-							wr.write("\tDisable flag is   : " + rtData.isDisableFlag() + "\n");
-							wr.write("\tSuspend flag is   : " + rtData.isSuspendFlag() + "\n");
-							wr.write("\tSkip flag is      : " + rtData.isSkipFlag() + "\n");
-							wr.write("\tForce flag is     : " + rtData.isForceManual() + "\n");
-							wr.write("\tAutoSkip flag is  : " + parms.isEnableAutoSkip() + "\n");
-							wr.write("\tError code is     : " + rtData.getErrorCode() + "\n");
-							wr.write("\tSensor dumping is : " + rtData.getParms().isDumpSensorReading() + "\n");
-							if (rtData.getDelayByMinutes() > 0)
-								wr.write("\tStart delayed by: " + rtData.getDelayByMinutes() + " min\n");
-							wr.write("ACK-ENDM\n");
+						case "resume":
+							rtData.setSuspendFlag(false);
+							wr.write("Suspend flag is now: " + rtData.isSuspendFlag() + "\n");
+							wr.write("ACK\n");
 							break;
 							
-						case "quit":
-							clientWantsToExit = true;
+						case "skip":
+							rtData.setSkipFlag(true);
+							wr.write("Skip flag is now: " + rtData.isSkipFlag() + "\n");
+							wr.write("ACK\n");
+							break;
+							
+						case "reset":
+							rtData.setSkipFlag(false);
+							wr.write("Skip flag is now: " + rtData.isSkipFlag() + "\n");
+							wr.write("ACK\n");
 							break;
 							
 						case "startman":
@@ -239,41 +170,83 @@ public class AdminCommands extends Thread
 
 							break;
 							
-						case "rescan":
-							rtData.setParms(parms.rescan());
-							rtData.evalFirstStart();
-							wr.write("Next startup at: " + rtData.getNextStartTime() + "\n");
-							wr.write("ACK\n");
+						case "start":
+							isStartCmd = true;
+						case "stop":
+							if (st.hasMoreTokens())
+							{
+								String inputParm = st.nextToken();
+								try
+								{
+									int zone = Integer.parseInt(inputParm);
+									if ((zone >= 0) && (parms.getZones() > zone))
+									{
+										rtData.setValveStatus(zone, isStartCmd);
+										wr.write("ACK\n");
+									}
+									else
+									{
+										wr.write("NACK\n");
+										wr.write("invalid zone. Valid ids are from 0 to " + 
+												 (parms.getZones() - 1) + "\n");
+
+									}
+								}
+								catch(NumberFormatException e)
+								{
+									wr.write("NACK\n");
+									wr.write("malformatted zone'" + inputParm + "\n");
+								}
+							}
 							break;
 							
-						case "skip":
-							rtData.setSkipFlag(true);
-							wr.write("Skip flag is now: " + rtData.isSkipFlag() + "\n");
-							wr.write("ACK\n");
-							break;
-							
-						case "reset":
-							rtData.setSkipFlag(false);
-							wr.write("Skip flag is now: " + rtData.isSkipFlag() + "\n");
-							wr.write("ACK\n");
+						case "status":
+							wr.write("ACK-M\n");
+							wr.write("\tNext startup at: " + rtData.getNextStartTime() + "\n");
+							wr.write("\tHumidity from sensors:\n");
+							for(int i = 0; i < parms.getNumberOfSensors(); i++)
+							{
+								wr.write("\t\tSensor " + i + " " + String.format("%2.2f", rtData.getMoisture(i)) + "\n");
+							}
+							wr.write("\tWatering is " + 
+									(rtData.getInCycle() < 0 ? "inactive\n" : "active on zone " + rtData.getInCycle() + ":\n"));
+							if (rtData.getInCycle() >= 0 )
+							{
+								for(int i = 0; i < parms.getZones(); i++)
+								{
+									wr.write("\t\tZone " + i + " " + 
+											 (rtData.getValveStatus(i) ? "watering" : "   off  ") + 
+											 (rtData.getValveStatus(i) ? " since " + rtData.getWateringTimeElapsed(i) + " sec" : "") +  "\n");
+								}
+							}
+							wr.write("\tDisable flag is   : " + rtData.isDisableFlag() + "\n");
+							wr.write("\tSuspend flag is   : " + rtData.isSuspendFlag() + "\n");
+							wr.write("\tSkip flag is      : " + rtData.isSkipFlag() + "\n");
+							wr.write("\tForce flag is     : " + rtData.isForceManual() + "\n");
+							wr.write("\tAutoSkip flag is  : " + parms.isEnableAutoSkip() + "\n");
+							wr.write("\tError code is     : " + rtData.getErrorCode() + "\n");
+							wr.write("\tSensor dumping is : " + rtData.getParms().isDumpSensorReading() + "\n");
+							if (rtData.getDelayByMinutes() > 0)
+								wr.write("\tStart delayed by: " + rtData.getDelayByMinutes() + " min\n");
+							wr.write("ACK-ENDM\n");
 							break;
 
-						case "suspend":
-							rtData.setSuspendFlag(true);
-							wr.write("Ssuspend flag is now: " + rtData.isSuspendFlag() + "\n");
-							wr.write("ACK\n");
-							break;
-
-						case "resume":
-							rtData.setSuspendFlag(false);
-							wr.write("Suspend flag is now: " + rtData.isSuspendFlag() + "\n");
-							wr.write("ACK\n");
-							break;
-							
-						case "readval":
-							parms.setDumpSensorReading(!parms.isDumpSensorReading());
-							wr.write("Sensor dumping is: " + rtData.getParms().isDumpSensorReading() + "\n");
-							wr.write("ACK\n");
+						case "seterr":
+							if (st.hasMoreTokens())
+							{
+								String inputParm = st.nextToken();
+								try
+								{
+									int errorCode = Integer.parseInt(inputParm);
+									rtData.setErrorCode(errorCode);
+									wr.write("ACK\n");
+								}
+								catch(NumberFormatException e)
+								{
+									wr.write("NACK\n");
+									wr.write("malformatted error code '" + inputParm + "\n");
+								}
+							}
 							break;
 
 						case "delay":
@@ -303,12 +276,35 @@ public class AdminCommands extends Thread
 							}
 							break;
 						
+						case "shutdown":
+							wr.write("ACK-M\n");
+							wr.write("\n\tShutting down .....\n");
+							wr.write("ACK-ENDM\n");
+							wr.flush();
+							clientSocket.close();
+							rtData.setShutDown(true);
+							logger.debug("Shutting the system down");
+							return;
+
+						case "rescan":
+							rtData.setParms(parms.rescan());
+							rtData.evalFirstStart();
+							wr.write("Next startup at: " + rtData.getNextStartTime() + "\n");
+							wr.write("ACK\n");
+							break;
+
 						case "autoskip":
 							parms.setEnableAutoSkip(!parms.isEnableAutoSkip());
 							wr.write("AutoSkip flag is now: " + parms.isEnableAutoSkip() + "\n");
 							wr.write("ACK\n");
 							break;
 							
+						case "readval":
+							parms.setDumpSensorReading(!parms.isDumpSensorReading());
+							wr.write("Sensor dumping is: " + parms.isDumpSensorReading() + "\n");
+							wr.write("ACK\n");
+							break;
+
 						case "testauto":
 							if (st.hasMoreTokens())
 							{
@@ -351,10 +347,14 @@ public class AdminCommands extends Thread
 							wr.write("\tdelay n     delay next start by n minutes\n");
 							wr.write("\tshutdown    shusts down the watering system\n");
 							wr.write("\trescan      rescan params file and use updated values\n");
-							wr.write("\tquit        exits this shell\n");
 							wr.write("\tautoskip    toggle auto skip based on the moisture value\n");
 							wr.write("\treadval     toggle dumping sensors value each reading\n");
+							wr.write("\tquit        exits this shell\n");
 							wr.write("ACK-ENDM\n");
+							break;
+							
+						case "quit":
+							clientWantsToExit = true;
 							break;
 							
 						default:

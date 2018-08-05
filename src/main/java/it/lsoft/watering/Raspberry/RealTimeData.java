@@ -97,7 +97,7 @@ public class RealTimeData
 			{
 				if (!parms.getActiveSchedules()[nextStart])
 					continue;
-				startAt = yyyyMMdd.format(lastStart) + " " + getStartAt()[nextStart];
+				startAt = yyyyMMdd.format((lastStart == null ? now : lastStart)) + " " + getStartAt()[nextStart];
 				logger.trace("start schedule " + nextStart + " is " + startAt + ". Now is " + longFmt.format(now));
 				if (longFmt.format(now).compareTo(startAt) < 0)
 				{

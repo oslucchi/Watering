@@ -296,7 +296,6 @@ public class Watering
 		{
 			return false;
 		}
-		logger.debug("It seems time to start or forced to start now.... Cheking other flags");
 		
 		if (rtData.isDisableFlag())
 		{
@@ -333,9 +332,11 @@ public class Watering
 			rtData.setSuspendFlag(false);
 			return false;
 		}
-		
+
+		boolean newCycleStarting = false;
 		if (inCycle == -1)
 		{
+			newCycleStarting = true;
 			// it's a new start requested
 			// A start is effectively requested. Archive all moistures
 			for(int i = 0; i < parms.getNumberOfSensors(); i++)
@@ -368,12 +369,27 @@ public class Watering
 			rtData.setForceManual(false);
 			return false;
 		}
+		
+		if(newCycleStarting)
+		{
+			// It's a fresh start. We need to open-up the first valve in order to get it running.
+			logger.debug("It seems time to start a new cycle or forced to do it manually");
+			logger.debug("Start watering zone " + inCycle + " for " + parms.getDuration(rtData, dayOfTheWeek) + " sec");
+			rtData.setValveStatus(inCycle, true);
+			logger.debug("Watering zone " + inCycle + 
+						 " for " + parms.getDurations()[inCycle][rtData.getNextStartIdx()][dayOfTheWeek] * 60 + " sec");
+		}
 		return true;
 	}
 	
 	private static void evalAndArchiveMoisture()
 	{	
-		boolean checkSkipConditions = ((now.getTime() > rtData.getNextStartTimeAsDate().getTime() - ONE_HOUR) && !rtData.isSkipFlag());
+		boolean checkSkipConditions = 	(
+											// Check only if we are 1 hour before watering and no skipFlag has been raised yet
+											(now.getTime() > rtData.getNextStartTimeAsDate().getTime() - ONE_HOUR) && 
+											(inCycle < 0) &&
+											!rtData.isSkipFlag()
+										);
 		boolean checkWateringEffectiveness = ((now.getTime() > rtData.getLastWateringSession().getTime() + FIFTEEN_MINUTES));
 		
 		/*
