@@ -244,6 +244,11 @@ public class Watering
 					// Switch off the current zone valve
 					rtData.setValveStatus(inCycle, false);
 					logger.debug("Watering time for zone " + inCycle + " reached. Moving to the next zone");
+					logger.debug("Check watering effectiveness on the area if a sensor exists for it");
+					if (parms.getSensorIdPerArea()[inCycle] != -1)
+					{
+						evalMoistureEffectiveness(parms.getSensorIdPerArea()[inCycle]);
+					}
 					
 					// Move to the next zone skipping those whose watering time is zero
 					inCycle++;
@@ -363,10 +368,11 @@ public class Watering
 			// so... either we're done or a new cycle starts
 			inCycle = -1;
 			rtData.setInCycle(-1);
-			logger.debug("No watering required in this run");
+			logger.debug("No more watering required in this run");
 			rtData.evalNextStartTime(false);
 			logger.debug("Next start time set to " + rtData.getNextStartTime());
 			rtData.setForceManual(false);
+			rtData.setLastWateringSession(rtData.getNextStartTimeAsDate());
 			return false;
 		}
 		
@@ -381,6 +387,22 @@ public class Watering
 		}
 		return true;
 	}
+
+	private static void evalMoistureEffectiveness(int sensorId)
+	{	
+		if (rtData.getMoisture(sensorId) != null)
+		{
+			logger.trace("expectedMoisture for the sensor: " + parms.getExpectedMoistureAfterWatering()[sensorId]);
+			if ((rtData.getMoisture(sensorId) < parms.getExpectedMoistureAfterWatering()[sensorId]))
+			{
+				logger.error("Moisture on sensor " + sensorId + " did not reach the expected level  during last watering session(" +
+						rtData.getMoisture(sensorId) + " - " + parms.getExpectedMoistureAfterWatering()[sensorId] + ").");
+				logger.error("Reset the skip and autoSkip flag");
+				rtData.setSkipFlag(false);
+				rtData.getParms().setEnableAutoSkip(false);
+			}
+		}
+	}
 	
 	private static void evalAndArchiveMoisture()
 	{	
@@ -390,15 +412,12 @@ public class Watering
 											(inCycle < 0) &&
 											!rtData.isSkipFlag()
 										);
-		boolean checkWateringEffectiveness = ((now.getTime() > rtData.getLastWateringSession().getTime() + FIFTEEN_MINUTES));
-		
 		/*
 		 * Check if it is time to archive the moisture read by sensors and do it
 		 */
 		if ((now.getTime() - lastArchive.getTime()) > parms.getSensorValueDumpInterval() * 1000)
 		{
 			logger.debug("checkSkipConditions: " + checkSkipConditions);
-			logger.debug("checkWateringEffectiveness: " + checkWateringEffectiveness + "(" + rtData.getLastWateringSession() + ")");
 
 			for(int i = 0; i < parms.getNumberOfSensors(); i++)
 			{
@@ -414,20 +433,7 @@ public class Watering
 								rtData.getParms().isEnableAutoSkip());
 						rtData.setSkipFlag(rtData.getParms().isEnableAutoSkip());
 					}
-					logger.trace("expectedMoisture for the sensor: " + parms.getExpectedMoistureAfterWatering()[i]);
-					if (checkWateringEffectiveness && (rtData.getMoisture(i) < parms.getExpectedMoistureAfterWatering()[i]))
-					{
-						logger.error("Moisture on sensor " + i + " did not reach the expected level  during last watering session(" +
-								rtData.getMoisture(i) + " - " + parms.getExpectedMoistureAfterWatering()[i] + ").");
-						logger.error("Reset the skip and autoSkip flag");
-						rtData.setSkipFlag(false);
-						rtData.getParms().setEnableAutoSkip(false);
-					}
 				}
-			}
-			if (checkWateringEffectiveness)
-			{
-				rtData.setLastWateringSession(rtData.getNextStartTimeAsDate());
 			}
 			lastArchive = now;
 		}

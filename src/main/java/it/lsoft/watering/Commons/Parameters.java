@@ -52,6 +52,7 @@ public class Parameters
 	private double[] expectedMoistureAfterWatering;
 	private boolean enableAutoSkip;
 	private boolean dumpSensorReading;
+	private int[] sensorIdPerArea;
 	
 	private static Parameters instance = null;
 	private static String confFilePath;
@@ -175,6 +176,13 @@ public class Parameters
 		}
 		enableAutoSkip = Boolean.parseBoolean(ini.get("general", "enableAutoSkip"));
 		dumpSensorReading = Boolean.parseBoolean(ini.get("general", "dumpSensorReading"));
+		dummyStringArray = ini.get("general", "sensorIdPerArea");
+		dummyStringItems = dummyStringArray.split(",");
+		sensorIdPerArea = new int [zones];
+		for(int i = 0; i < dummyStringItems.length; i++)
+		{
+			sensorIdPerArea[i] = Integer.parseInt(dummyStringItems[i]);
+		}
 	}
 
 	public int getZones() {
@@ -334,5 +342,9 @@ public class Parameters
 
 	public void setDumpSensorReading(boolean dumpSensorReading) {
 		this.dumpSensorReading = dumpSensorReading;
+	}
+
+	public int[] getSensorIdPerArea() {
+		return sensorIdPerArea;
 	}
 }
