@@ -360,5 +360,12 @@ public class RealTimeData
 	public void setLastWateringSession(Date lastWateringSession) {
 		this.lastWateringSession = lastWateringSession;
 	}
-	
+
+	public SimpleDateFormat getYyyyMMdd() {
+		return yyyyMMdd;
+	}
+
+	public SimpleDateFormat getLongFmt() {
+		return longFmt;
+	}
 }

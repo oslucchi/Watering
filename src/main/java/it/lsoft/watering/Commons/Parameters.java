@@ -53,6 +53,8 @@ public class Parameters
 	private boolean enableAutoSkip;
 	private boolean dumpSensorReading;
 	private int[] sensorIdPerArea;
+	private int minutesToSkipFlagCheck = 30 * 60 * 1000;
+	private int minutesToEvalWateringEffectivess = 2 * 60 * 1000;
 	
 	private static Parameters instance = null;
 	private static String confFilePath;
@@ -183,6 +185,9 @@ public class Parameters
 		{
 			sensorIdPerArea[i] = Integer.parseInt(dummyStringItems[i]);
 		}
+		minutesToSkipFlagCheck = Integer.parseInt(ini.get("general", "minutesToSkipFlagCheck"));
+		minutesToEvalWateringEffectivess = Integer.parseInt(ini.get("general", "minutesToEvalWateringEffectivess"));
+
 	}
 
 	public int getZones() {
@@ -303,6 +308,11 @@ public class Parameters
 		return (int) (durations[rtData.getInCycle()][rtData.getNextStartIdx()][dayOfTheWeek] * 60 * extendBy);
 	}
 	
+	public int getZoneDuration(int zone, RealTimeData rtData, int dayOfTheWeek)
+	{
+		return (int) (durations[zone][rtData.getNextStartIdx()][dayOfTheWeek] * 60 * extendBy);
+	}
+	
 	public int getNumberOfSchedules()
 	{
 		return schedule.length;
@@ -347,4 +357,13 @@ public class Parameters
 	public int[] getSensorIdPerArea() {
 		return sensorIdPerArea;
 	}
+
+	public int getMinutesToSkipFlagCheck() {
+		return minutesToSkipFlagCheck;
+	}
+
+	public int getMinutesToEvalWateringEffectivess() {
+		return minutesToEvalWateringEffectivess;
+	}
+	
 }

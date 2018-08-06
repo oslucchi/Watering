@@ -21,16 +21,14 @@ import it.lsoft.watering.AdminCommands;
 
 
 public class Watering 
-{
-	private static final int ONE_HOUR = 1000*60*60;
-	private static final int FIFTEEN_MINUTES = 1000*60*15;
-	
+{	
 	private static RealTimeData rtData = null;
 	private static ErrorsHandler eh = null;
 	private static SensorDataHandler sh = null;
 	private static ValveHandler[] vh = null;
 	private static PumpHandler ph = null;
 	private static ArchiveData ad = null;
+	private static MoistureCheck mc;
 	private static final Logger logger = Logger.getLogger(Watering.class);
 	private static Parameters parms = null;
 	private static Date now;
@@ -40,7 +38,7 @@ public class Watering
 	private static SimpleDateFormat longFmt = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 	private static int inCycle = -1;		
 
-	private static int dayOfWeekAsNumber(Date now)
+	public static int dayOfWeekAsNumber(Date now)
 	{
 		Calendar c = Calendar.getInstance();
 		c.setTime(now);
@@ -159,7 +157,7 @@ public class Watering
 		sleep(500);
 		
 		rtData.setInCycle(inCycle);
-		rtData.evalNextStartTime(false);
+		rtData.evalFirstStart();
 
 		logger.debug("First start time set to " + rtData.getNextStartTime());
 		logger.debug("current day of the week " + dayOfWeekAsNumber(new Date()));
@@ -167,6 +165,7 @@ public class Watering
 		startDuties(); // main watering cycle handler
 
 		sleep(3000);
+		
 		logger.debug("Waiting for thread shutdown");
 		boolean done = false;
 		while(!done)
@@ -217,7 +216,7 @@ public class Watering
 			
 			now = new Date();
 			dayOfTheWeek = dayOfWeekAsNumber(now);
-			evalAndArchiveMoisture();
+			archiveMoisture();
 									
 			inCycle = rtData.getInCycle();
 			if (isTimeToStart())
@@ -244,11 +243,6 @@ public class Watering
 					// Switch off the current zone valve
 					rtData.setValveStatus(inCycle, false);
 					logger.debug("Watering time for zone " + inCycle + " reached. Moving to the next zone");
-					logger.debug("Check watering effectiveness on the area if a sensor exists for it");
-					if (parms.getSensorIdPerArea()[inCycle] != -1)
-					{
-						evalMoistureEffectiveness(parms.getSensorIdPerArea()[inCycle]);
-					}
 					
 					// Move to the next zone skipping those whose watering time is zero
 					inCycle++;
@@ -367,13 +361,13 @@ public class Watering
 		{
 			// either no watering required or one zone made current to watering. 
 			// so... either we're done or a new cycle starts
-			inCycle = -1;
-			rtData.setInCycle(-1);
 			logger.debug("No more watering required in this run");
 			rtData.evalNextStartTime(true);
 			logger.debug("Next start time set to " + rtData.getNextStartTime());
 			rtData.setForceManual(false);
 			rtData.setLastWateringSession(rtData.getNextStartTimeAsDate());
+			inCycle = -1;
+			rtData.setInCycle(-1);
 			return false;
 		}
 		
@@ -388,57 +382,26 @@ public class Watering
 		}
 		return true;
 	}
-
-	private static void evalMoistureEffectiveness(int sensorId)
-	{	
-		if (rtData.getMoisture(sensorId) != null)
-		{
-			logger.trace("expectedMoisture for the sensor: " + parms.getExpectedMoistureAfterWatering()[sensorId]);
-			if ((rtData.getMoisture(sensorId) < parms.getExpectedMoistureAfterWatering()[sensorId]))
-			{
-				logger.error("Moisture on sensor " + sensorId + " did not reach the expected level  during last watering session(" +
-						rtData.getMoisture(sensorId) + " - " + parms.getExpectedMoistureAfterWatering()[sensorId] + ").");
-				logger.error("Reset the skip and autoSkip flag");
-				rtData.setSkipFlag(false);
-				rtData.getParms().setEnableAutoSkip(false);
-			}
-		}
-	}
 	
-	private static void evalAndArchiveMoisture()
+	private static void archiveMoisture()
 	{	
-		boolean checkSkipConditions = 	(
-											// Check only if we are 1 hour before watering and no skipFlag has been raised yet
-											(now.getTime() > rtData.getNextStartTimeAsDate().getTime() - ONE_HOUR) && 
-											(inCycle < 0) &&
-											!rtData.isSkipFlag()
-										);
 		/*
 		 * Check if it is time to archive the moisture read by sensors and do it
 		 */
 		if ((now.getTime() - lastArchive.getTime()) > parms.getSensorValueDumpInterval() * 1000)
 		{
-			logger.debug("checkSkipConditions: " + checkSkipConditions);
-
 			for(int i = 0; i < parms.getNumberOfSensors(); i++)
 			{
 				if (rtData.getMoisture(i) != null)
 				{
 					ad.archive(History.TYPE_MOISTURE, i, rtData.getMoisture(i),
 						   rtData.getSensorReadValue(i), rtData.getSensorRangeFrom(i), rtData.getSensorRangeTo(i));
-					logger.trace("skiptThreshold for the sensor: " + parms.getSkipTreshold()[i]);
-					if (checkSkipConditions && (rtData.getMoisture(i) > parms.getSkipTreshold()[i]))
-					{
-						logger.debug("Moisture on sensor " + i + " is bigger than the related treshold (" +
-								rtData.getMoisture(i) + " - " + parms.getSkipTreshold()[i] + "). Setting the skipFlag to " + 
-								rtData.getParms().isEnableAutoSkip());
-						rtData.setSkipFlag(rtData.getParms().isEnableAutoSkip());
-					}
 				}
 			}
 			lastArchive = now;
 		}
 	}
+
 	
 	private static void checkAndStartThreads()
 	{
@@ -492,6 +455,13 @@ public class Watering
 					vh[i].start();
 				}
 			}
+		}
+		if (mc == null)
+		{
+			logger.debug("Starting Moisture check thread");
+			mc = null;
+			mc = new MoistureCheck(rtData);
+			mc.start();
 		}
 	}
 }
