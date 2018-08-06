@@ -330,6 +330,7 @@ public class Watering
 			// The current cycle should be skipped either by manual or automatic request.
 			logger.debug("Skip request has been raised. No watering for this cycle");
 			logger.debug("Current watering time set to " + rtData.getNextStartTime() + " (will be reset)");
+			rtData.setLastStart(now);
 			rtData.evalNextStartTime(true);
 			logger.debug("Next watering time set to " + rtData.getNextStartTime());
 			rtData.setSkipFlag(false);
@@ -369,7 +370,7 @@ public class Watering
 			inCycle = -1;
 			rtData.setInCycle(-1);
 			logger.debug("No more watering required in this run");
-			rtData.evalNextStartTime(false);
+			rtData.evalNextStartTime(true);
 			logger.debug("Next start time set to " + rtData.getNextStartTime());
 			rtData.setForceManual(false);
 			rtData.setLastWateringSession(rtData.getNextStartTimeAsDate());
