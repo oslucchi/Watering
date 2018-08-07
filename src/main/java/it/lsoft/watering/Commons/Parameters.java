@@ -60,6 +60,7 @@ public class Parameters
 	private String mailUsername;
 	private String mailPassword;
 	private String mailHost;
+	private int mailPort;
 	private boolean mailUseSSL;
 	private String mailSmtpSSLTrust;
 	private String mailTo;
@@ -200,8 +201,10 @@ public class Parameters
 		mailUsername = ini.get("alerts", "mailUsername");
 		mailPassword = ini.get("alerts", "mailPassword");
 		mailHost = ini.get("alerts", "mailHost");
+		mailPort = Integer.parseInt(ini.get("alerts", "mailPort"));
 		mailUseSSL = Boolean.parseBoolean(ini.get("alerts", "mailUseSSL"));
 		mailSmtpSSLTrust = ini.get("alerts", "mailSmtpSSLTrust");
+		mailTo = ini.get("alerts", "mailTo");
 	}
 
 	public int getZones() {
@@ -402,21 +405,22 @@ public class Parameters
 	}
 	
 	public String getMailPassword() {
+		// A818sclp
+		// 01234567
+		// P8C8s1lA
 		char[] a = mailPassword.toCharArray();
 		char temp;
-		temp = flipCase(a[0]);
-		a[0] = flipCase(a[7]);
+		temp = a[0];
+		a[0] = a[7];
 		a[7] = temp;
-		temp = a[1];
-		a[1] = a[6];
-		a[6] = temp;
-		temp = flipCase(a[2]);
-		a[2] = flipCase(a[5]);
-		a[5] = temp;
-		temp = a[3];
-		a[3] = a[4];
-		a[4] = temp;
-		return a.toString();
+		temp = a[2];
+		a[2] = a[5];
+		a[5] = temp;		
+		a[1] = flipCase(a[1]);
+		a[3] = flipCase(a[3]);
+		a[5] = flipCase(a[5]);
+		a[7] = flipCase(a[7]);
+		return String.valueOf(a);
 	}
 
 	public String getMailHost() {
@@ -433,6 +437,10 @@ public class Parameters
 
 	public String getMailTo() {
 		return mailTo;
+	}
+
+	public int getMailPort() {
+		return mailPort;
 	}
 	
 }

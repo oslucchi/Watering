@@ -2,24 +2,11 @@ package it.lsoft.watering;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Properties;
-
-import javax.activation.DataSource;
-import javax.mail.BodyPart;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
 
 import org.apache.log4j.Logger;
 
 import it.lsoft.watering.Commons.Parameters;
+import it.lsoft.watering.Commons.Utility;
 import it.lsoft.watering.Raspberry.RealTimeData;
 
 public class MoistureCheck extends Thread
@@ -126,7 +113,7 @@ public class MoistureCheck extends Thread
 							logger.error("Reset the skip and autoSkip flag");
 							rtData.setSkipFlag(false);
 							parms.setEnableAutoSkip(false);
-							sendAlertByMail(mailBody);
+							Utility.sendAlertByMail(parms, mailBody);
 						}
 						else
 						{
@@ -169,74 +156,9 @@ public class MoistureCheck extends Thread
 									  rtData.getParms().isEnableAutoSkip();
 					logger.debug(mailBody);
 					rtData.setSkipFlag(rtData.getParms().isEnableAutoSkip());
-					sendAlertByMail(mailBody);
+					Utility.sendAlertByMail(parms, mailBody);
 				}
 			}
-		}
-	}
-
-	public void sendAlertByMail(String mailBody)
-	{
-		// Sender's email ID needs to be mentioned
-		Properties props = new Properties();
-
-		props.put("mail.smtp.auth", "true");
-		props.put("mail.smtp.starttls.enable", "true");
-		props.put("mail.smtp.host", parms.getMailHost());
-		props.put("mail.smtp.port", "25");
-		//		props.put("mail.smtp.port", "587");
-		props.put("mail.smtp.user", parms.getMailUsername());
-		props.put("mail.smtp.password", parms.getMailPassword());
-		//		props.put("mail.smtp.ssl.trust", "smtp.gmail.com");
-		if (parms.istMailUseSSL())
-		{
-			props.put("mail.smtp.ssl.trust", parms.getMailSmtpSSLTrust());
-		}
-
-		// Get the Session object.
-		Session session = Session.getInstance(props,
-				new javax.mail.Authenticator() {
-			protected PasswordAuthentication getPasswordAuthentication() {
-				return new PasswordAuthentication(parms.getMailUsername(), parms.getMailPassword());
-			}
-		});
-
-		try {
-			// Create a default MimeMessage object.
-			Message message = new MimeMessage(session);
-
-			// Set From: header field of the header.
-			message.setFrom(new InternetAddress(parms.getMailFrom()));
-
-			// Set To: header field of the header.
-			message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(parms.getMailTo()));
-
-			// Set Subject: header field
-			message.setSubject("Watering alert - new alert raised by the system");
-
-			// Create a multipar message and the message part
-			Multipart multipart = new MimeMultipart();
-			BodyPart messageBodyPart = new MimeBodyPart();
-			DataSource source;
-			try
-			{
-				// Now set the actual message
-				messageBodyPart.setContent(mailBody.toString(),"text/html");
-				multipart.addBodyPart(messageBodyPart);
-				message.setContent(multipart);
-
-				logger.info("Sending new alert to " + parms.getMailFrom());
-				Transport.send(message);
-				logger.info("Successfully sent....");
-			}
-			catch(Exception e)
-			{
-				logger.error("Expection " + e.getMessage() + " sending new alert");
-			}
-		} 
-		catch (MessagingException e) 
-		{
-			throw new RuntimeException(e);
 		}
 	}
 }
