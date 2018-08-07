@@ -56,6 +56,14 @@ public class Parameters
 	private int minutesToSkipFlagCheck = 30 * 60 * 1000;
 	private int minutesToEvalWateringEffectivess = 2 * 60 * 1000;
 	
+	private String mailFrom;
+	private String mailUsername;
+	private String mailPassword;
+	private String mailHost;
+	private boolean mailUseSSL;
+	private String mailSmtpSSLTrust;
+	private String mailTo;
+	
 	private static Parameters instance = null;
 	private static String confFilePath;
 	
@@ -187,7 +195,13 @@ public class Parameters
 		}
 		minutesToSkipFlagCheck = Integer.parseInt(ini.get("general", "minutesToSkipFlagCheck"));
 		minutesToEvalWateringEffectivess = Integer.parseInt(ini.get("general", "minutesToEvalWateringEffectivess"));
-
+		
+		mailFrom = ini.get("alerts", "mailFrom");
+		mailUsername = ini.get("alerts", "mailUsername");
+		mailPassword = ini.get("alerts", "mailPassword");
+		mailHost = ini.get("alerts", "mailHost");
+		mailUseSSL = Boolean.parseBoolean(ini.get("alerts", "mailUseSSL"));
+		mailSmtpSSLTrust = ini.get("alerts", "mailSmtpSSLTrust");
 	}
 
 	public int getZones() {
@@ -364,6 +378,61 @@ public class Parameters
 
 	public int getMinutesToEvalWateringEffectivess() {
 		return minutesToEvalWateringEffectivess;
+	}
+
+	public String getMailFrom() {
+		return mailFrom;
+	}
+
+	public String getMailUsername() {
+		return mailUsername;
+	}
+
+	private char flipCase(char a)
+	{
+		if (Character.isUpperCase(a))
+		{
+			return Character.toLowerCase(a);
+		}
+		else if (Character.isLowerCase(a))
+		{
+			return Character.toUpperCase(a);
+		}
+		return a;
+	}
+	
+	public String getMailPassword() {
+		char[] a = mailPassword.toCharArray();
+		char temp;
+		temp = flipCase(a[0]);
+		a[0] = flipCase(a[7]);
+		a[7] = temp;
+		temp = a[1];
+		a[1] = a[6];
+		a[6] = temp;
+		temp = flipCase(a[2]);
+		a[2] = flipCase(a[5]);
+		a[5] = temp;
+		temp = a[3];
+		a[3] = a[4];
+		a[4] = temp;
+		return a.toString();
+	}
+
+	public String getMailHost() {
+		return mailHost;
+	}
+
+	public boolean istMailUseSSL() {
+		return mailUseSSL;
+	}
+
+	public String getMailSmtpSSLTrust() {
+		return mailSmtpSSLTrust;
+	}
+
+	public String getMailTo() {
+		return mailTo;
 	}
 	
 }
