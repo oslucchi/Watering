@@ -456,7 +456,7 @@ public class Watering
 				}
 			}
 		}
-		if (mc == null)
+		if ((mc == null) || !mc.isAlive())
 		{
 			logger.debug("Starting Moisture check thread");
 			mc = null;

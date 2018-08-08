@@ -88,43 +88,56 @@ public class MoistureCheck extends Thread
 	}
 	
 	private void evalMoistureEffectiveness()
-	{
-		int i;
-		
+	{		
 		if (checkList != null)
 		{
-			for(i = parms.getZones() - 1; i >= 0 && !checkList[i].checked; i--)
+			for(int i = parms.getZones() - 1; i >= 0; i--)
 			{
-				if (now.getTime() > checkList[i].timeToCheck.getTime())
+				if (! checkList[i].checked) 
 				{
-					checkList[i].checked = true;
-					int sensorId = parms.getSensorIdPerArea()[i];
-					if (sensorId != -1) 
+					if (now.getTime() > checkList[i].timeToCheck.getTime())
 					{
-						logger.debug("Check watering effectiveness on the area " + sensorId);
-						if ((rtData.getMoisture(sensorId) != null) &&
-							(rtData.getMoisture(sensorId) < parms.getExpectedMoistureAfterWatering()[sensorId]))
+						logger.debug("Zone " + i + ": ");
+						logger.debug("\ttime to check was '" + rtData.getLongFmt().format(checkList[i].timeToCheck) + "'");
+						logger.debug("\tchecked flag was '" + checkList[i].checked + "'");
+						logger.debug("marked as moisture checked");
+						checkList[i].checked = true;
+						
+						int sensorId = parms.getSensorIdPerArea()[i];
+						if (sensorId != -1) 
 						{
-							String mailBody = "Moisture on sensor " + sensorId + 
-											  " did not reach the expected level  during last watering session(" +
-											  rtData.getMoisture(sensorId) + " - " + 
-											  parms.getExpectedMoistureAfterWatering()[sensorId] + ").";
-							logger.error(mailBody);
-							logger.error("Reset the skip and autoSkip flag");
-							rtData.setSkipFlag(false);
-							parms.setEnableAutoSkip(false);
-							Utility.sendAlertByMail(parms, mailBody);
+							logger.debug("Check watering effectiveness on the area " + sensorId);
+							if ((rtData.getMoisture(sensorId) != null) &&
+								(rtData.getMoisture(sensorId) < parms.getExpectedMoistureAfterWatering()[sensorId]))
+							{
+								String mailBody = "Moisture on sensor " + sensorId + 
+												  " did not reach the expected level  during last watering session(" +
+												  rtData.getMoisture(sensorId) + " - " + 
+												  parms.getExpectedMoistureAfterWatering()[sensorId] + ").";
+								logger.error(mailBody);
+								logger.error("Reset the skip and autoSkip flag");
+								rtData.setSkipFlag(false);
+								parms.setEnableAutoSkip(false);
+								Utility.sendAlertByMail(parms, mailBody);
+							}
+							else
+							{
+								logger.error("Moisture on sensor " + sensorId + " is at the expected level (" +
+										rtData.getMoisture(sensorId) + " - " + parms.getExpectedMoistureAfterWatering()[sensorId] + ").");
+							}
 						}
-						else
-						{
-							logger.error("Moisture on sensor " + sensorId + " is at the expected level (" +
-									rtData.getMoisture(sensorId) + " - " + parms.getExpectedMoistureAfterWatering()[sensorId] + ").");
-						}
-					}
-					break;
+					}					
 				}
 			}
-			if (i == parms.getZones() - 1)
+			boolean done = true;
+			for(int i = 0; i < parms.getZones(); i++)
+			{
+				if (! checkList[i].checked)
+				{
+					done = false;
+				}
+			}
+			if (done)
 			{
 				checkList = null;
 				logger.error("Watering effectiveness check completed");
