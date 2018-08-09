@@ -123,7 +123,8 @@ public class MoistureCheck extends Thread
 							else
 							{
 								logger.error("Moisture on sensor " + sensorId + " is at the expected level (" +
-										rtData.getMoisture(sensorId) + " - " + parms.getExpectedMoistureAfterWatering()[sensorId] + ").");
+										rtData.getMoisture(sensorId) + " - " + 
+										parms.getExpectedMoistureAfterWatering()[sensorId] + ").");
 							}
 						}
 					}					

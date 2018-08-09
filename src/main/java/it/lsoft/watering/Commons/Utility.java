@@ -83,7 +83,6 @@ public class Utility
 			props.put("mail.smtp.ssl.trust", parms.getMailSmtpSSLTrust());
 		}
 
-		logger.info("Pwd: '" + parms.getMailPassword() + "'");
 		// Get the Session object.
 		Session session = Session.getInstance(props,
 				new javax.mail.Authenticator() {
@@ -115,7 +114,7 @@ public class Utility
 				multipart.addBodyPart(messageBodyPart);
 				message.setContent(multipart);
 
-				logger.info("Sending new alert to " + parms.getMailFrom());
+				logger.info("Sending new alert to " + parms.getMailTo());
 				Transport.send(message);
 				logger.info("Successfully sent....");
 			}

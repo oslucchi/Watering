@@ -216,7 +216,7 @@ public class Watering
 			
 			now = new Date();
 			dayOfTheWeek = dayOfWeekAsNumber(now);
-			archiveMoisture();
+			archiveAllMoistures(false, History.TYPE_MOISTURE);
 									
 			inCycle = rtData.getInCycle();
 			if (isTimeToStart())
@@ -229,14 +229,11 @@ public class Watering
 					
 					// Archive the moisture level so to have an evaluation of how much the watering
 					// cycle impacts on the ground moisture for future tuning.
-					for(int i = 0; i < parms.getNumberOfSensors(); i++)
+					int sensorId = parms.getSensorIdPerArea()[inCycle];
+					if (sensorId != -1)
 					{
-						if (rtData.getMoisture(i) != null)
-						{
-							ad.archive(History.TYPE_MOISTURE, inCycle, rtData.getMoisture(i));
-						}
+						ad.archive(History.TYPE_MOISTURE_AT_END, sensorId, rtData.getMoisture(sensorId));
 					}
-					
 					// Archive the watering time for the current zone
 					ad.archive(History.TYPE_WATERING_TIME, inCycle, rtData.getWateringTimeElapsed(inCycle));
 					
@@ -339,13 +336,8 @@ public class Watering
 			newCycleStarting = true;
 			// it's a new start requested
 			// A start is effectively requested. Archive all moistures
-			for(int i = 0; i < parms.getNumberOfSensors(); i++)
-			{
-				if (rtData.getMoisture(i) != null)
-				{
-					ad.archive(History.TYPE_MOISTURE, inCycle, rtData.getMoisture(i));
-				}
-			}
+			archiveAllMoistures(true, History.TYPE_MOISTURE_AT_START);
+
 			inCycle = 0;
 			rtData.setInCycle(0);
 			rtData.setLastStart(now);
@@ -383,25 +375,29 @@ public class Watering
 		return true;
 	}
 	
-	private static void archiveMoisture()
+	private static void archiveAllMoistures(boolean force, final int recordType)
 	{	
 		/*
 		 * Check if it is time to archive the moisture read by sensors and do it
 		 */
-		if ((now.getTime() - lastArchive.getTime()) > parms.getSensorValueDumpInterval() * 1000)
+		if (((now.getTime() - lastArchive.getTime()) > parms.getSensorValueDumpInterval() * 1000) || force)
 		{
 			for(int i = 0; i < parms.getNumberOfSensors(); i++)
 			{
-				if (rtData.getMoisture(i) != null)
-				{
-					ad.archive(History.TYPE_MOISTURE, i, rtData.getMoisture(i),
-						   rtData.getSensorReadValue(i), rtData.getSensorRangeFrom(i), rtData.getSensorRangeTo(i));
-				}
+				archiveMoisture(i, recordType);
 			}
 			lastArchive = now;
 		}
 	}
 
+	private static void archiveMoisture(int sensordId, final int recordType)
+	{	
+		if (rtData.getMoisture(sensordId) != null)
+		{
+			ad.archive(recordType, sensordId, rtData.getMoisture(sensordId),
+				   rtData.getSensorReadValue(sensordId), rtData.getSensorRangeFrom(sensordId), rtData.getSensorRangeTo(sensordId));
+		}
+	}
 	
 	private static void checkAndStartThreads()
 	{

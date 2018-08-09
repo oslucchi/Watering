@@ -7,6 +7,8 @@ public class History extends DBInterface
 	public static final int TYPE_MOISTURE = 0;
 	public static final int TYPE_WATERING_TIME = 1;
 	public static final int TYPE_VALVE_CHANGE_STATUS = 2;
+	public static final int TYPE_MOISTURE_AT_START = 3;
+	public static final int TYPE_MOISTURE_AT_END = 4;
 	
 	private static final long serialVersionUID = -7844508274722236575L;
 	
