@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.StringTokenizer;
@@ -81,7 +82,17 @@ public class AdminCommands extends Thread
 					if (br.ready())
 					{
 						boolean isStartCmd = false;
-						input = br.readLine();
+						try
+						{
+							input = br.readLine();
+						}
+						catch(SocketTimeoutException e)
+						{
+							logger.error("the user has been to quiet. Dropping the connection");
+							wr.write("Too long to decide what you wonna do with me... try to reconnect\n");
+							clientWantsToExit = true;
+							break;
+						}
 						logger.trace("input length " + input.length());
 						if (input.length() == 0)
 						{

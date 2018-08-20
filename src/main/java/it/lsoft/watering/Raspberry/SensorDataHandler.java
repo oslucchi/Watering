@@ -80,7 +80,7 @@ public class SensorDataHandler extends Thread
 	{
 		double sum = 0.0;
 		int population = 0;
-		for(int i = 1; i < values.length; i++)
+		for(int i = 1; i <= parms.getMeasuresToConsider(); i++)
 		{
 			if (values[i] != null)
 			{
@@ -111,7 +111,7 @@ public class SensorDataHandler extends Thread
 			{
 				parms = rtData.getParms();
 				
-				if (counter > parms.getSensorReadInterval())
+				if ((counter > parms.getSensorReadInterval()) || (warmUp > 0))
 				{
 					//Read based on the interval stated in the conf file
 					counter = 0;
@@ -149,13 +149,16 @@ public class SensorDataHandler extends Thread
 							}
 						}
 					}
-					if (warmUp > 0)
-					{
-						warmUp--;
-					}
 				}
 				Thread.sleep(1000);
-				counter++;
+				if (warmUp > 0)
+				{
+					warmUp--;
+				}
+				else
+				{
+					counter++;
+				}
 			}
 		}
 		catch (InterruptedException e) 

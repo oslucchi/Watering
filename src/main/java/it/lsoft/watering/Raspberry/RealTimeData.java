@@ -19,6 +19,7 @@ public class RealTimeData
 	private boolean[] valveStatus;
 	private int[] wateringTimeElapsed;
 	private boolean shutDown = false;
+	private boolean runMoistureCheck = false;
 	private boolean forceManual = false;
 	private int	delayByMinutes = 0;
 	private boolean requiredChangeOnStartTime = false;
@@ -368,4 +369,13 @@ public class RealTimeData
 	public SimpleDateFormat getLongFmt() {
 		return longFmt;
 	}
+
+	public boolean isRunMoistureCheck() {
+		return runMoistureCheck;
+	}
+
+	public void setRunMoistureCheck(boolean runMoistureCheck) {
+		this.runMoistureCheck = runMoistureCheck;
+	}
+	
 }

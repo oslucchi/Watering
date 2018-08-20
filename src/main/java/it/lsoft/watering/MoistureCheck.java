@@ -39,8 +39,21 @@ public class MoistureCheck extends Thread
 		SimpleDateFormat longFmt = rtData.getLongFmt();
 		parms = rtData.getParms();
 		
-		while(!rtData.isShutDown())
+		while(rtData.isRunMoistureCheck())
 		{
+			try 
+			{
+				Thread.sleep(1000);
+			} 
+			catch (InterruptedException e) 
+			{
+				continue;
+			}
+			if (!parms.isEnableAutoSkip())
+			{
+				continue;
+			}
+			
 			now = new Date();
 			// Initiate the watering effectiveness check only if: the set-time from watering is over, 
 			// it wasn't initiated already (checkList = null) and it wasn't requested a skip for this cycle
@@ -75,16 +88,8 @@ public class MoistureCheck extends Thread
 			evalMoistureEffectiveness();
 
 			evalSkipNextCycle();
-			try 
-			{
-				Thread.sleep(1000);
-			} 
-			catch (InterruptedException e) 
-			{
-				;
-			}
-
 		}
+		logger.debug("Moisture check thread exiting");
 	}
 	
 	private void evalMoistureEffectiveness()
@@ -169,7 +174,7 @@ public class MoistureCheck extends Thread
 									  rtData.getMoisture(i) + " - " + parms.getSkipTreshold()[i] + "). Setting the skipFlag to " + 
 									  rtData.getParms().isEnableAutoSkip();
 					logger.debug(mailBody);
-					rtData.setSkipFlag(rtData.getParms().isEnableAutoSkip());
+					rtData.setSkipFlag(true);
 					Utility.sendAlertByMail(parms, mailBody);
 				}
 			}

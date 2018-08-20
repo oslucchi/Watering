@@ -230,7 +230,7 @@ public class Watering
 					// Archive the moisture level so to have an evaluation of how much the watering
 					// cycle impacts on the ground moisture for future tuning.
 					int sensorId = parms.getSensorIdPerArea()[inCycle];
-					if (sensorId != -1)
+					if ((sensorId != -1) && (rtData.getMoisture(sensorId) != null))
 					{
 						ad.archive(History.TYPE_MOISTURE_AT_END, sensorId, rtData.getMoisture(sensorId));
 					}
@@ -452,12 +452,24 @@ public class Watering
 				}
 			}
 		}
-		if ((mc == null) || !mc.isAlive())
+		if (parms.isEnableAutoSkip())
 		{
-			logger.debug("Starting Moisture check thread");
-			mc = null;
-			mc = new MoistureCheck(rtData);
-			mc.start();
+			if ((mc == null) || ! mc.isAlive())
+			{
+				logger.debug("Starting Moisture check thread");
+				rtData.setRunMoistureCheck(true);
+				mc = null;
+				mc = new MoistureCheck(rtData);
+				mc.start();
+			}
+		}
+		else
+		{
+			if (rtData.isRunMoistureCheck())
+			{
+				logger.debug("Stopping Moisture check thread");
+				rtData.setRunMoistureCheck(false);
+			}
 		}
 	}
 }

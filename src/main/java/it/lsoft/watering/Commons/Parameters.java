@@ -64,6 +64,7 @@ public class Parameters
 	private boolean mailUseSSL;
 	private String mailSmtpSSLTrust;
 	private String mailTo;
+	private int socketTimeout;
 	
 	private static Parameters instance = null;
 	private static String confFilePath;
@@ -205,6 +206,8 @@ public class Parameters
 		mailUseSSL = Boolean.parseBoolean(ini.get("alerts", "mailUseSSL"));
 		mailSmtpSSLTrust = ini.get("alerts", "mailSmtpSSLTrust");
 		mailTo = ini.get("alerts", "mailTo");
+
+		socketTimeout = Integer.parseInt(ini.get("io", "socketTimeout"));
 	}
 
 	public int getZones() {
@@ -441,6 +444,10 @@ public class Parameters
 
 	public int getMailPort() {
 		return mailPort;
+	}
+
+	public int getSocketTimeout() {
+		return socketTimeout;
 	}
 	
 }
