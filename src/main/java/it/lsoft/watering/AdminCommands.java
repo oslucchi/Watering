@@ -1,5 +1,6 @@
 package it.lsoft.watering;
 
+import it.lsoft.watering.Commons.Errors;
 import it.lsoft.watering.Commons.Parameters;
 import it.lsoft.watering.Raspberry.RealTimeData;
 
@@ -213,7 +214,14 @@ public class AdminCommands extends Thread
 							
 						case "status":
 							wr.write("ACK-M\n");
-							wr.write("\tNext startup at: " + rtData.getNextStartTime() + "\n");
+							if (rtData.getMode().compareTo("manual") == 0)
+							{
+								wr.write("\tThe system is running in manual mode\n");
+							}
+							else
+							{
+								wr.write("\tNext startup at: " + rtData.getNextStartTime() + "\n");
+							}
 							wr.write("\tHumidity from sensors:\n");
 							for(int i = 0; i < parms.getNumberOfSensors(); i++)
 							{
@@ -250,6 +258,38 @@ public class AdminCommands extends Thread
 								{
 									int errorCode = Integer.parseInt(inputParm);
 									rtData.setErrorCode(errorCode);
+									wr.write("ACK\n");
+								}
+								catch(NumberFormatException e)
+								{
+									wr.write("NACK\n");
+									wr.write("malformatted error code '" + inputParm + "\n");
+								}
+							}
+							break;
+
+						case "mode":
+							if (st.hasMoreTokens())
+							{
+								String inputParm = st.nextToken();
+								try
+								{
+									switch(inputParm)
+									{
+									case "a":
+										rtData.setMode("auto");
+										rtData.setErrorCode(rtData.getErrorCode() & 0b111111101111111111111111);
+										wr.write("Re-evaluated next start time to " + rtData.getNextStartTime());
+										wr.write("ACK\n");
+										break;
+									case "m":
+										rtData.setMode("manual");
+										rtData.setErrorCode(rtData.getErrorCode() | Errors.STATUS_MANUAL);
+										break;
+									default:
+										wr.write("NACK\n");
+										wr.write("bad status '" + inputParm + "'\n");
+									}
 									wr.write("ACK\n");
 								}
 								catch(NumberFormatException e)
@@ -365,6 +405,7 @@ public class AdminCommands extends Thread
 							wr.write("\trescan      rescan params file and use updated values\n");
 							wr.write("\tautoskip    toggle auto skip based on the moisture value\n");
 							wr.write("\treadval     toggle dumping sensors value each reading\n");
+							wr.write("\tmode a|m set watring in manual/auto mode\n");
 							wr.write("\tquit        exits this shell\n");
 							wr.write("ACK-ENDM\n");
 							break;

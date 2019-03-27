@@ -5,8 +5,10 @@ public class Errors {
 	public static final int SENSOR_HANDLE_ERROR = 1;
 	public static final int VALVE_HANDLE_ERROR = 2;
 	public static final int PUMP_HANDLE_ERROR = 4;
-	public static final int ARCHIVE_HANDLE_ERROR = 4;
+	public static final int READ_SENSOR_ERROR = 8;
 	public static final int DB_CONNECTION_ERROR = 1 << 8;
 	public static final int DATA_FILE_WRITE_ERROR = 2 << 8;
-	public static final int READ_SENSOR_ERROR = 1 << 16;
+	public static final int ARCHIVE_HANDLE_ERROR = 4 << 8;
+	
+	public static final int STATUS_MANUAL = 1 << 16;
 }

@@ -221,7 +221,6 @@ public class Watering
 			inCycle = rtData.getInCycle();
 			if (isTimeToStart())
 			{
-				rtData.setLastWateringSession(now);
 				// A watering cycle is currently active
 				if (rtData.getWateringTimeElapsed(inCycle) > parms.getDuration(rtData, dayOfTheWeek))
 				{
@@ -365,12 +364,23 @@ public class Watering
 		
 		if(newCycleStarting)
 		{
-			// It's a fresh start. We need to open-up the first valve in order to get it running.
-			logger.debug("It seems time to start a new cycle or forced to do it manually");
-			logger.debug("Start watering zone " + inCycle + " for " + parms.getDuration(rtData, dayOfTheWeek) + " sec");
-			rtData.setValveStatus(inCycle, true);
-			logger.debug("Watering zone " + inCycle + 
-						 " for " + parms.getDurations()[inCycle][rtData.getNextStartIdx()][dayOfTheWeek] * 60 + " sec");
+			if ((rtData.getMode().compareTo("manual") == 0) && !rtData.isForceManual())
+			{
+				// mode is set to manual but no force manual is requested.
+				// stay there
+				;
+			}
+			else
+			{
+				rtData.setLastWateringSession(now);
+				
+				// It's a fresh start. We need to open-up the first valve in order to get it running.
+				logger.debug("It seems time to start a new cycle or forced to do it manually");
+				logger.debug("Start watering zone " + inCycle + " for " + parms.getDuration(rtData, dayOfTheWeek) + " sec");
+				rtData.setValveStatus(inCycle, true);
+				logger.debug("Watering zone " + inCycle + 
+							 " for " + parms.getDurations()[inCycle][rtData.getNextStartIdx()][dayOfTheWeek] * 60 + " sec");
+			}
 		}
 		return true;
 	}

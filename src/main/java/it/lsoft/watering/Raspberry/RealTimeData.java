@@ -31,6 +31,7 @@ public class RealTimeData
 	private boolean suspendFlag = false;
 	private boolean disableFlag = false;
 	private Date lastWateringSession;
+	private String mode = "auto";
 
 	private Date now;
 	private Date lastStart;
@@ -224,7 +225,8 @@ public class RealTimeData
 
 	public synchronized void setErrorCode(long errorCode) 
 	{
-		this.errorCode = errorCode;
+		this.errorCode = (this.errorCode & 0b11111111111111110000000000000000) | 
+						 (errorCode & 0b00000000000000001111111111111111);
 	}
 
 	public boolean isShutDown() {
@@ -359,7 +361,10 @@ public class RealTimeData
 	}
 
 	public void setLastWateringSession(Date lastWateringSession) {
-		this.lastWateringSession = lastWateringSession;
+		if (mode.compareTo("auto") == 0)
+		{
+			this.lastWateringSession = lastWateringSession;
+		}
 	}
 
 	public SimpleDateFormat getYyyyMMdd() {
@@ -377,5 +382,15 @@ public class RealTimeData
 	public void setRunMoistureCheck(boolean runMoistureCheck) {
 		this.runMoistureCheck = runMoistureCheck;
 	}
-	
+	public String getMode() {
+		return mode;
+	}
+
+	public void setMode(String mode) {
+		this.mode = mode;
+		if (mode.compareTo("auto") == 0)
+		{
+			evalNextStartTime(false);
+		}
+	}
 }

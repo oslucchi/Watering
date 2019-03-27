@@ -2,6 +2,7 @@ package it.lsoft.watering.Raspberry;
 
 import it.lsoft.watering.Commons.Parameters;
 
+import java.util.Date;
 import java.util.EnumSet;
 
 import org.apache.log4j.Logger;
@@ -31,6 +32,7 @@ public class ErrorsHandler extends Thread
 	private Parameters parms;
 	private RealTimeData rtData;
 	private String pinName;
+	private Date pressStart; 
 
 	static Logger logger = Logger.getLogger(ErrorsHandler.class);
 
@@ -75,6 +77,24 @@ public class ErrorsHandler extends Thread
 					if (event.getState() == PinState.LOW)
 					{
 						logger.debug(" Reset button pressed: " + event.getPin() + " = " + event.getState()); 
+						if (pressStart == null) 
+							pressStart = new Date();
+					}
+					else if (pressStart != null)
+					{
+						if (new Date().getTime() - pressStart.getTime() > parms.getPressTimeToStartManual())
+						{
+							rtData.setForceManual(true);
+							rtData.setScheduleIndex(0);
+						}
+						else
+						{
+							rtData.setErrorCode(0);
+						}
+						pressStart = null;
+					}
+					else
+					{
 						rtData.setErrorCode(0);
 					}
 				} 

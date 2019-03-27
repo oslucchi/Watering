@@ -45,6 +45,7 @@ public class Parameters
 	private int resetBtn;
 	private String[] schedule;
 	private int[][][] durations;
+	private int[][] manualDurations; 
 	private boolean[] activeSchedules;
 	private double extendBy = 1.0;
 	private int measuresToConsider = 6;
@@ -55,6 +56,7 @@ public class Parameters
 	private int[] sensorIdPerArea;
 	private int minutesToSkipFlagCheck = 30 * 60 * 1000;
 	private int minutesToEvalWateringEffectivess = 2 * 60 * 1000;
+	private int pressTimeToStartManual = 3000;
 	
 	private String mailFrom;
 	private String mailUsername;
@@ -124,6 +126,18 @@ public class Parameters
 			entryName = "valveGPIOZone_" + i;
 			valveGPIOZone[i] = Integer.parseInt(ini.get("io", entryName));
 		}
+		
+		manualDurations = new int[zones][7];
+		for (int i = 0; i < zones; i++)
+		{
+			String entryName = "manualZone_" + i;
+			int day = 0;
+			for(String duration : ini.get("timer", entryName).split(","))
+			{
+				manualDurations[i][day++] = Integer.parseInt(duration);
+			}
+		}
+		
 		activeSchedules = new boolean[schedule.length];
 		counter = 0;
 		for(String active : ini.get("timer", "activeSchedules").split(","))
@@ -197,6 +211,7 @@ public class Parameters
 		}
 		minutesToSkipFlagCheck = Integer.parseInt(ini.get("general", "minutesToSkipFlagCheck"));
 		minutesToEvalWateringEffectivess = Integer.parseInt(ini.get("general", "minutesToEvalWateringEffectivess"));
+		pressTimeToStartManual =  Integer.parseInt(ini.get("general", "pressTimeToStartManual"));
 		
 		mailFrom = ini.get("alerts", "mailFrom");
 		mailUsername = ini.get("alerts", "mailUsername");
@@ -208,6 +223,10 @@ public class Parameters
 		mailTo = ini.get("alerts", "mailTo");
 
 		socketTimeout = Integer.parseInt(ini.get("io", "socketTimeout"));
+	}
+
+	public int getPressTimeToStartManual() {
+		return pressTimeToStartManual;
 	}
 
 	public int getZones() {
@@ -323,9 +342,16 @@ public class Parameters
 		return durations;
 	}
 	
+	public int[][] getManualDurations() {
+		return manualDurations;
+	}
+	
 	public int getDuration(RealTimeData rtData, int dayOfTheWeek)
 	{
-		return (int) (durations[rtData.getInCycle()][rtData.getNextStartIdx()][dayOfTheWeek] * 60 * extendBy);
+		if (rtData.getMode().compareTo("auto") == 0)
+			return (int) (durations[rtData.getInCycle()][rtData.getNextStartIdx()][dayOfTheWeek] * 60 * extendBy);
+		else
+			return (int) (manualDurations[rtData.getInCycle()][dayOfTheWeek] * 60 * extendBy);
 	}
 	
 	public int getZoneDuration(int zone, RealTimeData rtData, int dayOfTheWeek)
