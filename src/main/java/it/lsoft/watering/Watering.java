@@ -222,9 +222,12 @@ public class Watering
 			if (isTimeToStart())
 			{
 				// A watering cycle is currently active
-				if (rtData.getWateringTimeElapsed(inCycle) > parms.getDuration(rtData, dayOfTheWeek))
+				if ((rtData.getWateringTimeElapsed(inCycle) > parms.getDuration(rtData, dayOfTheWeek)) ||
+					(rtData.isSkipZoneFlag()))
 				{
-					// The watering time is over. Move to the next area requiring to be watered
+					// The watering time is over or a zone skip request has been raised.
+					// Move to the next area requiring to be watered
+					rtData.setSkipZoneFlag(false);
 					
 					// Archive the moisture level so to have an evaluation of how much the watering
 					// cycle impacts on the ground moisture for future tuning.
@@ -303,19 +306,19 @@ public class Watering
 				
 				// Switch off the current zone valve
 				rtData.setValveStatus(inCycle, false);
-				logger.debug("Watering time for zone " + inCycle + " terminated due to disable flag");
+				logger.debug("Watering terminated due to disable flag");
 			}
 			rtData.evalNextStartTime(true);
 			logger.debug("Reavaluated next start time to " + rtData.getNextStartTime());
 			inCycle = -1;
 			rtData.setInCycle(inCycle);
 			rtData.setForceManual(false);
-			rtData.setSkipFlag(false);
+			rtData.setSkipCycleFlag(false);
 			rtData.setSuspendFlag(false);
 			return false;
 		}
 		
-		if (rtData.isSkipFlag())
+		if (rtData.isSkipCycleFlag())
 		{
 			// The current cycle should be skipped either by manual or automatic request.
 			logger.debug("Skip request has been raised. No watering for this cycle");
@@ -323,7 +326,7 @@ public class Watering
 			rtData.setLastStart(now);
 			rtData.evalNextStartTime(true);
 			logger.debug("Next watering time set to " + rtData.getNextStartTime());
-			rtData.setSkipFlag(false);
+			rtData.setSkipCycleFlag(false);
 			rtData.setForceManual(false);
 			rtData.setSuspendFlag(false);
 			return false;

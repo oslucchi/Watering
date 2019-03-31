@@ -142,14 +142,32 @@ public class AdminCommands extends Thread
 							break;
 							
 						case "skip":
-							rtData.setSkipFlag(true);
-							wr.write("Skip flag is now: " + rtData.isSkipFlag() + "\n");
-							wr.write("ACK\n");
+							if (st.hasMoreTokens())
+							{
+								switch(st.nextToken())
+								{
+								case "cycle":
+									rtData.setSkipCycleFlag(true);
+									wr.write("Skip cycle flag is now: " + rtData.isSkipCycleFlag() + "\n");
+									wr.write("ACK\n");
+									break;
+									
+								case "zone":
+									rtData.setSkipZoneFlag(true);
+									wr.write("Skip zone flag is now: " + rtData.isSkipZoneFlag() + "\n");
+									wr.write("ACK\n");
+									break;
+								
+								default:
+									wr.write("NACK\n");
+									wr.write("Parameter wrong or missing [usage: skip cycle|zone]\n");
+								}
+							}
 							break;
 							
 						case "reset":
-							rtData.setSkipFlag(false);
-							wr.write("Skip flag is now: " + rtData.isSkipFlag() + "\n");
+							rtData.setSkipCycleFlag(false);
+							wr.write("Skip flag is now: " + rtData.isSkipCycleFlag() + "\n");
 							wr.write("ACK\n");
 							break;
 							
@@ -240,7 +258,7 @@ public class AdminCommands extends Thread
 							}
 							wr.write("\tDisable flag is   : " + rtData.isDisableFlag() + "\n");
 							wr.write("\tSuspend flag is   : " + rtData.isSuspendFlag() + "\n");
-							wr.write("\tSkip flag is      : " + rtData.isSkipFlag() + "\n");
+							wr.write("\tSkip flag is      : " + rtData.isSkipCycleFlag() + "\n");
 							wr.write("\tForce flag is     : " + rtData.isForceManual() + "\n");
 							wr.write("\tAutoSkip flag is  : " + parms.isEnableAutoSkip() + "\n");
 							wr.write("\tError code is     : " + rtData.getErrorCode() + "\n");

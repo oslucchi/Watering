@@ -76,26 +76,32 @@ public class ErrorsHandler extends Thread
 					// display pin state on console 
 					if (event.getState() == PinState.LOW)
 					{
-						logger.debug(" Reset button pressed: " + event.getPin() + " = " + event.getState()); 
+						logger.debug("Reset button pressed: " + event.getPin() + " = " + event.getState()); 
 						if (pressStart == null) 
 							pressStart = new Date();
 					}
 					else if (pressStart != null)
 					{
+						logger.debug("Reset button released: " + event.getPin() + " = " + event.getState()); 
+						logger.debug("It was pressed for " + (new Date().getTime() - pressStart.getTime()) + " ms");
 						if (new Date().getTime() - pressStart.getTime() > parms.getPressTimeToStartManual())
 						{
-							rtData.setForceManual(true);
-							rtData.setScheduleIndex(0);
+							if (rtData.getInCycle() == -1)
+							{
+								logger.debug("Forcing a manual cycle to start ms");
+								rtData.setForceManual(true);
+								rtData.setScheduleIndex(0);
+							}
 						}
 						else
 						{
-							rtData.setErrorCode(0);
+							rtData.setErrorCode(rtData.getErrorCode() & 0xFFFF0000);
 						}
 						pressStart = null;
 					}
 					else
 					{
-						rtData.setErrorCode(0);
+						rtData.setErrorCode(rtData.getErrorCode() & 0xFFFF0000);
 					}
 				} 
 			}

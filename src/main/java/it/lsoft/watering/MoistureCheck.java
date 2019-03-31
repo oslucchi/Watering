@@ -60,10 +60,10 @@ public class MoistureCheck extends Thread
 			if ((longFmt.format(now).compareTo(rtData.getNextStartTime()) == 0) && (checkList == null))
 			{
 				logger.info("watering effectiveness time is arrived. Set the checktime array accordingly");
-				if  (rtData.isSkipFlag() || rtData.isDisableFlag() || rtData.isSuspendFlag())
+				if  (rtData.isSkipCycleFlag() || rtData.isDisableFlag() || rtData.isSuspendFlag())
 				{
 					logger.info("...but unfortunately the watering request is somehow cancelled (Skip-Dis-Susp: " +
-								rtData.isSkipFlag() + " - " + rtData.isDisableFlag() + " - " + rtData.isSuspendFlag() + ")." );
+								rtData.isSkipCycleFlag() + " - " + rtData.isDisableFlag() + " - " + rtData.isSuspendFlag() + ")." );
 					logger.info("Going back to rest");
 				}
 				else
@@ -121,7 +121,7 @@ public class MoistureCheck extends Thread
 												  parms.getExpectedMoistureAfterWatering()[sensorId] + ").";
 								logger.error(mailBody);
 								logger.error("Reset the skip and autoSkip flag");
-								rtData.setSkipFlag(false);
+								rtData.setSkipCycleFlag(false);
 								parms.setEnableAutoSkip(false);
 								Utility.sendAlertByMail(parms, mailBody);
 							}
@@ -156,7 +156,7 @@ public class MoistureCheck extends Thread
 		// Check only if we are before the next cycle (so not in a watering cycle) and no skipFlag has been raised yet
 		if ((now.getTime() < rtData.getNextStartTimeAsDate().getTime() - parms.getMinutesToSkipFlagCheck() * 60000) || 
 			(rtData.getInCycle() >= 0) ||
-			rtData.isSkipFlag())
+			rtData.isSkipCycleFlag())
 		{
 			return;
 		}
@@ -174,7 +174,7 @@ public class MoistureCheck extends Thread
 									  rtData.getMoisture(i) + " - " + parms.getSkipTreshold()[i] + "). Setting the skipFlag to " + 
 									  rtData.getParms().isEnableAutoSkip();
 					logger.debug(mailBody);
-					rtData.setSkipFlag(true);
+					rtData.setSkipCycleFlag(true);
 					Utility.sendAlertByMail(parms, mailBody);
 				}
 			}

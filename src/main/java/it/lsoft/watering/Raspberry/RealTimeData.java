@@ -27,7 +27,8 @@ public class RealTimeData
 	private String[] startAt;
 	private String nextStartTime;
 	private int inCycle = -1;
-	private boolean skipFlag = false;
+	private boolean skipCycleFlag = false;
+	private boolean skipZoneFlag  = false;
 	private boolean suspendFlag = false;
 	private boolean disableFlag = false;
 	private Date lastWateringSession;
@@ -225,8 +226,7 @@ public class RealTimeData
 
 	public synchronized void setErrorCode(long errorCode) 
 	{
-		this.errorCode = (this.errorCode & 0b11111111111111110000000000000000) | 
-						 (errorCode & 0b00000000000000001111111111111111);
+		this.errorCode = errorCode;
 	}
 
 	public boolean isShutDown() {
@@ -315,12 +315,12 @@ public class RealTimeData
 		return nextStart;
 	}
 
-	public boolean isSkipFlag() {
-		return skipFlag;
+	public boolean isSkipCycleFlag() {
+		return skipCycleFlag;
 	}
 
-	public void setSkipFlag(boolean skipFlag) {
-		this.skipFlag = skipFlag;
+	public void setSkipCycleFlag(boolean skipFlag) {
+		this.skipCycleFlag = skipFlag;
 	}
 
 	public boolean isSuspendFlag() {
@@ -392,5 +392,13 @@ public class RealTimeData
 		{
 			evalNextStartTime(false);
 		}
+	}
+
+	public boolean isSkipZoneFlag() {
+		return skipZoneFlag;
+	}
+
+	public void setSkipZoneFlag(boolean skipZoneFlag) {
+		this.skipZoneFlag = skipZoneFlag;
 	}
 }
