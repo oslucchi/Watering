@@ -423,7 +423,7 @@ public class AdminCommands extends Thread
 							wr.write("\trescan      rescan params file and use updated values\n");
 							wr.write("\tautoskip    toggle auto skip based on the moisture value\n");
 							wr.write("\treadval     toggle dumping sensors value each reading\n");
-							wr.write("\tmode a|m set watring in manual/auto mode\n");
+							wr.write("\tmode a|m    set watering in auto/manual mode\n");
 							wr.write("\tquit        exits this shell\n");
 							wr.write("ACK-ENDM\n");
 							break;

@@ -258,8 +258,6 @@ public class Watering
 						sleep(2000);
 						logger.debug("Start watering zone " + inCycle + " for " + parms.getDuration(rtData, dayOfTheWeek) + " sec");
 						rtData.setValveStatus(inCycle, true);
-						logger.debug("Watering zone " + inCycle + 
-									 " for " + parms.getDurations()[inCycle][rtData.getNextStartIdx()][dayOfTheWeek] * 60 + " sec");
 					}
 				}
 			}

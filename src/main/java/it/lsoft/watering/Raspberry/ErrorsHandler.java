@@ -86,15 +86,14 @@ public class ErrorsHandler extends Thread
 						logger.debug("It was pressed for " + (new Date().getTime() - pressStart.getTime()) + " ms");
 						if (new Date().getTime() - pressStart.getTime() > parms.getPressTimeToStartManual())
 						{
-							if (rtData.getInCycle() == -1)
-							{
-								logger.debug("Forcing a manual cycle to start ms");
-								rtData.setForceManual(true);
-								rtData.setScheduleIndex(0);
-							}
+							logger.debug("Forcing a manual cycle to start ms");
+							rtData.setForceManual(true);
+							rtData.setScheduleIndex(0);
 						}
 						else
 						{
+							logger.debug("Button pressed for less than " + parms.getPressTimeToStartManual() + 
+										 ". Just resetting errors");
 							rtData.setErrorCode(rtData.getErrorCode() & 0xFFFF0000);
 						}
 						pressStart = null;
