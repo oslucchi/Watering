@@ -379,8 +379,6 @@ public class Watering
 				logger.debug("It seems time to start a new cycle or forced to do it manually");
 				logger.debug("Start watering zone " + inCycle + " for " + parms.getDuration(rtData, dayOfTheWeek) + " sec");
 				rtData.setValveStatus(inCycle, true);
-				logger.debug("Watering zone " + inCycle + 
-							 " for " + parms.getDurations()[inCycle][rtData.getNextStartIdx()][dayOfTheWeek] * 60 + " sec");
 			}
 		}
 		return true;

@@ -40,7 +40,7 @@ public class AdminCommands extends Thread
 			}
 			catch (IOException e) 
 			{
-				logger.fatal("Exception " + e.getMessage() + " on ServerSocket cretion");
+				logger.fatal("Exception " + e.getMessage() + " on ServerSocket creation");
 				rtData.setShutDown(true);
 			}
 		}
@@ -146,13 +146,13 @@ public class AdminCommands extends Thread
 							{
 								switch(st.nextToken())
 								{
-								case "cycle":
+								case "c":
 									rtData.setSkipCycleFlag(true);
 									wr.write("Skip cycle flag is now: " + rtData.isSkipCycleFlag() + "\n");
 									wr.write("ACK\n");
 									break;
 									
-								case "zone":
+								case "z":
 									rtData.setSkipZoneFlag(true);
 									wr.write("Skip zone flag is now: " + rtData.isSkipZoneFlag() + "\n");
 									wr.write("ACK\n");
@@ -160,7 +160,7 @@ public class AdminCommands extends Thread
 								
 								default:
 									wr.write("NACK\n");
-									wr.write("Parameter wrong or missing [usage: skip cycle|zone]\n");
+									wr.write("Parameter wrong or missing [usage: skip c|z]\n");
 								}
 							}
 							break;
@@ -411,7 +411,7 @@ public class AdminCommands extends Thread
 							wr.write("\tensable     reset watering to normal logic\n");
 							wr.write("\tsuspend     suspend current zone watering\n");
 							wr.write("\tresume      resume previously suspended watering\n");
-							wr.write("\tskip        skip the next watering cycle\n");
+							wr.write("\tskip z/c    skip current zone or entire watering cycle\n");
 							wr.write("\treset       reset a skip cycle flag previously set\n");
 							wr.write("\tstartman x  forces a manual start of a cycle on the x-th schedule\n");
 							wr.write("\tstart n     force start watering of the nth zone\n");
