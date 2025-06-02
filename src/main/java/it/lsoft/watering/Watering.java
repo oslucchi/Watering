@@ -1,32 +1,25 @@
 package it.lsoft.watering;
 
-
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 
 import it.lsoft.watering.Commons.Parameters;
 import it.lsoft.watering.DBUtils.ArchiveData;
 import it.lsoft.watering.DBUtils.History;
-import it.lsoft.watering.Raspberry.ErrorsHandler;
-import it.lsoft.watering.Raspberry.PumpHandler;
-import it.lsoft.watering.Raspberry.RealTimeData;
-import it.lsoft.watering.Raspberry.SensorDataHandler;
-import it.lsoft.watering.Raspberry.ValveHandler;
-import it.lsoft.watering.AdminCommands;
+import it.lsoft.watering.Raspberry.*;
 
-
-public class Watering 
-{	
+public class Watering {
 	private static RealTimeData rtData = null;
-	private static ErrorsHandler eh = null;
-	private static SensorDataHandler sh = null;
-	private static ValveHandler[] vh = null;
-	private static PumpHandler ph = null;
+	private static IWateringHandler errorsHandler = null;
+	private static IWateringHandler sensorHandler = null;
+	private static IWateringHandler[] valveHandlers = null;
+	private static IWateringHandler pumpHandler = null;
 	private static ArchiveData ad = null;
 	private static MoistureCheck mc;
 	private static final Logger logger = Logger.getLogger(Watering.class);
@@ -36,49 +29,13 @@ public class Watering
 	private static int dayOfTheWeek;
 	private static SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
 	private static SimpleDateFormat longFmt = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-	private static int inCycle = -1;		
+	private static int inCycle = -1;
 
-	public static int dayOfWeekAsNumber(Date now)
-	{
-		Calendar c = Calendar.getInstance();
-		c.setTime(now);
-		switch(c.get(Calendar.DAY_OF_WEEK))
-		{
-		case Calendar.MONDAY:
-			return 0;
-		case Calendar.TUESDAY:
-			return 1;
-		case Calendar.WEDNESDAY:
-			return 2;
-		case Calendar.THURSDAY:
-			return 3;
-		case Calendar.FRIDAY:
-			return 4;
-		case Calendar.SATURDAY:
-			return 5;
-		case Calendar.SUNDAY:
-			return 6;
+	public static void main(String[] args) {
+		if (args.length < 1) {
+			System.out.println("Usage: java -jar Watering.jar <config_file> [disable]");
+			System.exit(1);
 		}
-		return -1;
-	}
-	
-	private static void sleep(int mills)
-	{
-		try {
-			Thread.sleep(mills);
-		} 
-		catch (InterruptedException e1) {
-			;
-		}
-
-	}
-	/**
-	 * @param args
-	 * @throws IOException 
-	 * @throws WateringException 
-	 */
-	public static void main(String[] args) 
-	{
 
 		parms = Parameters.getInstance(args[0]);
 
@@ -89,22 +46,19 @@ public class Watering
 		rtData = new RealTimeData(parms);
 		logger.debug("Data structures created");
 		
-		// Error Handler spawn
 		rtData.setErrorCode(0);
 
-		if((args.length >= 3) && (args[2].compareTo("disable") == 0))
+		if((args.length >= 2) && (args[1].compareTo("disable") == 0))
 		{
 			rtData.setDisableFlag(true);
 		}
 
-		// Data archiver
 		ad = new ArchiveData(rtData);
 
 		try 
 		{
 			logger.debug("Starting Error Handler thread");
-			eh = new ErrorsHandler(rtData);
-			eh.start();
+			initializeHandlers();
 		}
 		catch(Exception e)
 		{
@@ -113,47 +67,57 @@ public class Watering
 		
 		sleep(500);	
 		
-		// ADC Handler spawn
 		if (parms.isUseMoistureSensor())
 		{
 			try 
 			{
 				logger.debug("Starting Sensor Handler thread");
-				sh = new SensorDataHandler(rtData);
-				sh.start();
+				sensorHandler = SensorDataHandlerFactory.createHandler(rtData);
+				sensorHandler.start();
 			}
-			catch (IOException e)
+			catch (Exception e)
 			{
 				logger.error("Exception " + e.getMessage() + " creating SensorHandler thread");
 			}
 			sleep(500);
 		}		
-		// Valve handler spawn
-		vh = new ValveHandler[parms.getZones()];
+
+		valveHandlers = new IWateringHandler[parms.getZones()];
 		for(int i = 0; i < parms.getZones(); i++)
 		{
-			vh[i] = null;
-			logger.debug("Starting Valve " + i + " Handler thread");
-			vh[i] = new ValveHandler(rtData, i, ad);
-			vh[i].start();
-			sleep(250);	
+			try {
+				logger.debug("Starting Valve " + i + " Handler thread");
+				valveHandlers[i] = ValveHandlerFactory.createHandler(rtData, i, ad);
+				valveHandlers[i].start();
+				sleep(250);	
+			} catch (Exception e) {
+				logger.error("Exception " + e.getMessage() + " creating ValveHandler thread");
+			}
 		}
 		sleep(500);
 
 		if (parms.isEnablePump())
 		{
-			// Pumphandler spawn
-			logger.debug("Starting Pump Handler thread");
-			ph = new PumpHandler(rtData);
-			ph.start();
-			
-			sleep(500);
+			try {
+				logger.debug("Starting Pump Handler thread");
+				pumpHandler = PumpHandlerFactory.createHandler(rtData);
+				pumpHandler.start();
+				sleep(500);
+			} catch (Exception e) {
+				logger.error("Exception " + e.getMessage() + " creating PumpHandler thread");
+			}
 		}
 		
 		AdminCommands ac;
 		logger.debug("Starting Admin commands thread");
 		ac = new AdminCommands(rtData);
 		ac.start();
+		sleep(500);
+
+		JsonAdminCommands jsonAc;
+		logger.debug("Starting JSON Admin commands thread");
+		jsonAc = new JsonAdminCommands(rtData);
+		jsonAc.start();
 		sleep(500);
 		
 		rtData.setInCycle(inCycle);
@@ -162,7 +126,7 @@ public class Watering
 		logger.debug("First start time set to " + rtData.getNextStartTime());
 		logger.debug("current day of the week " + dayOfWeekAsNumber(new Date()));
 		
-		startDuties(); // main watering cycle handler
+		startDuties();
 
 		sleep(3000);
 		
@@ -172,28 +136,28 @@ public class Watering
 		{
 			sleep(3000);
 			done = true;
-			if ((sh != null) && sh.isAlive())
+			if ((sensorHandler != null) && sensorHandler.isAlive())
 			{
 				logger.trace("Sensor handler still alive");
 				done = false;
 			}
-			if ((ph != null) && ph.isAlive())
+			if ((pumpHandler != null) && pumpHandler.isAlive())
 			{
 				logger.trace("Pump handler still alive");
 				done = false;
 			}
-			if (vh != null) 
+			if (valveHandlers != null) 
 			{
 				for(int i = 0; i < parms.getZones(); i++)
 				{
-					if ((vh[i] != null) && vh[i].isAlive())
+					if ((valveHandlers[i] != null) && valveHandlers[i].isAlive())
 					{
 						logger.trace("Valve " + i + " handler still alive");
 						done = false;
 					}
 				}
 			}
-			if ((eh != null) && eh.isAlive())
+			if ((errorsHandler != null) && errorsHandler.isAlive())
 			{
 				logger.trace("Error handler still alive");
 				done = false;
@@ -201,66 +165,17 @@ public class Watering
 		}
 		logger.debug("Threads ended. Exit program");
 		System.exit(0);
-
 	}
 		
 	private static void startDuties()
 	{
-		lastArchive = new Date();
-		rtData.setLastWateringSession(rtData.getNextStartTimeAsDate());
-		while(!rtData.isShutDown())
-		{
-			parms = rtData.getParms();
-			
+		mc = new MoistureCheck(rtData);
+		mc.start();
+		sleep(500);
+
+		logger.debug("Starting duties");
+		while (!rtData.isShutDown()) {
 			checkAndStartThreads();
-			
-			now = new Date();
-			dayOfTheWeek = dayOfWeekAsNumber(now);
-			archiveAllMoistures(false, History.TYPE_MOISTURE);
-									
-			inCycle = rtData.getInCycle();
-			if (isTimeToStart())
-			{
-				// A watering cycle is currently active
-				if ((rtData.getWateringTimeElapsed(inCycle) > parms.getDuration(rtData, dayOfTheWeek)) ||
-					(rtData.isSkipZoneFlag()))
-				{
-					// The watering time is over or a zone skip request has been raised.
-					// Move to the next area requiring to be watered
-					rtData.setSkipZoneFlag(false);
-					
-					// Archive the moisture level so to have an evaluation of how much the watering
-					// cycle impacts on the ground moisture for future tuning.
-					int sensorId = parms.getSensorIdPerArea()[inCycle];
-					if ((sensorId != -1) && (rtData.getMoisture(sensorId) != null))
-					{
-						ad.archive(History.TYPE_MOISTURE_AT_END, sensorId, rtData.getMoisture(sensorId));
-					}
-					// Archive the watering time for the current zone
-					ad.archive(History.TYPE_WATERING_TIME, inCycle, rtData.getWateringTimeElapsed(inCycle));
-					
-					// Switch off the current zone valve
-					rtData.setValveStatus(inCycle, false);
-					logger.debug("Watering time for zone " + inCycle + " reached. Moving to the next zone");
-					
-					// Move to the next zone skipping those whose watering time is zero
-					inCycle++;
-					rtData.setInCycle(inCycle);
-					while((inCycle < parms.getZones()) && (parms.getDuration(rtData, dayOfTheWeek) == 0))
-					{
-						logger.debug("Skipping zone " + inCycle + " having watering time set to 0");
-						inCycle++;
-						rtData.setInCycle(inCycle);
-					}
-					if (inCycle < parms.getZones())
-					{
-						// A new area requiring to be watered has to be activated
-						sleep(2000);
-						logger.debug("Start watering zone " + inCycle + " for " + parms.getDuration(rtData, dayOfTheWeek) + " sec");
-						rtData.setValveStatus(inCycle, true);
-					}
-				}
-			}
 			sleep(1000);
 		}
 	}
@@ -412,14 +327,14 @@ public class Watering
 	
 	private static void checkAndStartThreads()
 	{
-		if ((eh == null) || !eh.isAlive())
+		if ((errorsHandler == null) || !errorsHandler.isAlive())
 		{
-			logger.debug("Restarting Errors Handler thread");
-			eh = null;
+			logger.debug("Restarting Error Handler thread");
+			errorsHandler = null;
 			try 
 			{
-				eh = new ErrorsHandler(rtData);
-				eh.start();
+				errorsHandler = ErrorsHandlerFactory.createErrorsHandler(rtData);
+				errorsHandler.start();
 			}
 			catch(Exception e)
 			{
@@ -427,39 +342,53 @@ public class Watering
 			}
 		}
 
-		if (parms.isUseMoistureSensor() && ((sh == null) || !sh.isAlive()))
+		if (parms.isUseMoistureSensor() && ((sensorHandler == null) || !sensorHandler.isAlive()))
 		{
 			logger.debug("Restarting Sensor Handler thread");
-			sh = null;
+			sensorHandler = null;
 			try 
 			{
-				sh = new SensorDataHandler(rtData);
-				sh.start();
+				sensorHandler = SensorDataHandlerFactory.createHandler(rtData);
+				sensorHandler.start();
 			}
-			catch (IOException e)
+			catch (Exception e)
 			{
 				logger.error("Exception " + e.getMessage() + " creating SensorHandler thread");
 			}
 		}
 		
-		if (parms.isEnablePump() && ((ph == null) || !ph.isAlive()))
+		if (parms.isEnablePump() && ((pumpHandler == null) || !pumpHandler.isAlive()))
 		{
 			logger.debug("Restarting Pump Handler thread");
-			ph = new PumpHandler(rtData);
-			ph.start();
+			pumpHandler = null;
+			try 
+			{
+				pumpHandler = PumpHandlerFactory.createHandler(rtData);
+				pumpHandler.start();
+			}
+			catch (Exception e)
+			{
+				logger.error("Exception " + e.getMessage() + " creating PumpHandler thread");
+			}
 		}
 
-		if (vh != null) 
+		if (valveHandlers != null) 
 		{
 			for(int i = 0; i < parms.getZones(); i++)
 			{
-				if ((vh[i] == null) || !vh[i].isAlive())
+				if ((valveHandlers[i] == null) || !valveHandlers[i].isAlive())
 				{
 					logger.debug("Restarting Valve Handler " + i + " thread");
-					vh[i] = null;
-					vh[i] = new ValveHandler(rtData, i, ad);
-					logger.debug("Starting Valve " + i + " Handler thread");
-					vh[i].start();
+					valveHandlers[i] = null;
+					try 
+					{
+						valveHandlers[i] = ValveHandlerFactory.createHandler(rtData, i, ad);
+						valveHandlers[i].start();
+					}
+					catch (Exception e)
+					{
+						logger.error("Exception " + e.getMessage() + " creating ValveHandler thread");
+					}
 				}
 			}
 		}
@@ -482,5 +411,41 @@ public class Watering
 				rtData.setRunMoistureCheck(false);
 			}
 		}
+	}
+
+	private static void initializeHandlers() throws Exception {
+		errorsHandler = ErrorsHandlerFactory.createErrorsHandler(rtData);
+		sensorHandler = SensorDataHandlerFactory.createHandler(rtData);
+		pumpHandler = PumpHandlerFactory.createHandler(rtData);
+
+		valveHandlers = new IWateringHandler[rtData.getParms().getZones()];
+		for (int i = 0; i < rtData.getParms().getZones(); i++) {
+			valveHandlers[i] = ValveHandlerFactory.createHandler(rtData, i, ad);
+		}
+
+		// Start all handlers
+		errorsHandler.start();
+		sensorHandler.start();
+		pumpHandler.start();
+		for (IWateringHandler handler : valveHandlers) {
+			handler.start();
+		}
+	}
+
+	private static void sleep(int millis)
+	{
+		try {
+			Thread.sleep(millis);
+		} catch (InterruptedException e) {
+			logger.error("Sleep interrupted: " + e.getMessage());
+			Thread.currentThread().interrupt();
+		}
+	}
+
+	public static int dayOfWeekAsNumber(Date now)
+	{
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(now);
+		return cal.get(Calendar.DAY_OF_WEEK);
 	}
 }

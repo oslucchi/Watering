@@ -16,7 +16,7 @@ import com.pi4j.io.gpio.impl.PinImpl;
 
 import it.lsoft.watering.Commons.Parameters;
 
-public class PumpHandler extends Thread
+public class PumpHandler extends Thread implements IWateringHandler
 {
 	final GpioController gpio = GpioFactory.getInstance();
 	private GpioPinDigitalOutput pin;

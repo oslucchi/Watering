@@ -9,8 +9,9 @@ import com.pi4j.io.spi.SpiDevice;
 import com.pi4j.io.spi.SpiFactory;
 
 import it.lsoft.watering.Commons.Parameters;
+import it.lsoft.watering.Raspberry.IWateringHandler;
 
-public class SensorDataHandler extends Thread 
+public class SensorDataHandler extends Thread implements IWateringHandler
 {
 	final static int AVERAGE_INDEX = 0;
 	private Parameters parms;

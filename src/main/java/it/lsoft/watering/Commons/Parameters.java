@@ -476,4 +476,7 @@ public class Parameters
 		return socketTimeout;
 	}
 	
+	public int getValveCount() {
+		return zones;
+	}
 }

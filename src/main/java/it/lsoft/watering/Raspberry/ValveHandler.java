@@ -19,7 +19,7 @@ import it.lsoft.watering.Commons.Parameters;
 import it.lsoft.watering.DBUtils.ArchiveData;
 import it.lsoft.watering.DBUtils.History;
 
-public class ValveHandler extends Thread
+public class ValveHandler extends Thread implements IWateringHandler
 {
 	final GpioController gpio = GpioFactory.getInstance();
 	private GpioPinDigitalOutput pin;

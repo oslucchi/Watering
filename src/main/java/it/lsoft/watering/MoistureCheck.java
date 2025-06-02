@@ -8,8 +8,9 @@ import org.apache.log4j.Logger;
 import it.lsoft.watering.Commons.Parameters;
 import it.lsoft.watering.Commons.Utility;
 import it.lsoft.watering.Raspberry.RealTimeData;
+import it.lsoft.watering.Raspberry.IWateringHandler;
 
-public class MoistureCheck extends Thread
+public class MoistureCheck extends Thread implements IWateringHandler
 {
 	private class MoistureCheckEntry {
 		private boolean checked;
@@ -25,21 +26,22 @@ public class MoistureCheck extends Thread
 	private MoistureCheckEntry[] checkList = null;
 	private Parameters parms = null;
 
-	static Logger logger = Logger.getLogger(MoistureCheck.class);
+	private static final Logger logger = Logger.getLogger(MoistureCheck.class);
 
 	public MoistureCheck(RealTimeData rtData)
 	{
 		this.rtData = rtData;
+		logger.info("Initialized Moisture Check");
 	}
 	
 	@Override
 	public void run() 
 	{
-		logger.debug("Moisture check thread started");
+		logger.debug("Moisture Check thread started");
 		SimpleDateFormat longFmt = rtData.getLongFmt();
 		parms = rtData.getParms();
 		
-		while(rtData.isRunMoistureCheck())
+		while (!rtData.isShutDown())
 		{
 			try 
 			{
@@ -47,7 +49,9 @@ public class MoistureCheck extends Thread
 			} 
 			catch (InterruptedException e) 
 			{
-				continue;
+				logger.error("Error in moisture check: " + e.getMessage());
+				Thread.currentThread().interrupt();
+				break;
 			}
 			if (!parms.isEnableAutoSkip())
 			{

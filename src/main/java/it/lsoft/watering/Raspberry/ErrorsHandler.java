@@ -20,7 +20,7 @@ import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
 import com.pi4j.io.gpio.event.GpioPinListenerDigital;
 import com.pi4j.io.gpio.impl.PinImpl;
 
-public class ErrorsHandler extends Thread
+public class ErrorsHandler extends Thread implements IWateringHandler
 {
 	private GpioController gpio;
 	private GpioPinDigitalOutput pinLed1;

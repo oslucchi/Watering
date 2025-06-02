@@ -1,0 +1,235 @@
+02-06 23:02:01 [DEBUG] (Watering.java:main:87) Got parms from configuration file. DBHOST is 192.168.200.103 (192.168.200.103)
+02-06 23:02:01 [ INFO] (HardwareControllerFactory.java:createController:15) Creating Mock Hardware Controller (Test Mode)
+02-06 23:02:01 [ INFO] (MockHardwareController.java:<init>:28) Mock hardware controller initialized with 8 zones
+02-06 23:02:01 [DEBUG] (RealTimeData.java:<init>:89) RealTimeData initialized with 8 zones
+02-06 23:02:01 [DEBUG] (RealTimeData.java:evalFirstStart:68) First start time set to 2025-06-03 07:30
+02-06 23:02:01 [DEBUG] (Watering.java:main:91) Data structures created
+02-06 23:02:01 [DEBUG] (ArchiveData.java:<init>:29) Connection established
+02-06 23:02:01 [DEBUG] (Watering.java:main:106) Starting Error Handler thread
+02-06 23:03:37 [DEBUG] (Watering.java:main:88) Got parms from configuration file. DBHOST is 192.168.200.103 (192.168.200.103)
+02-06 23:03:37 [ INFO] (HardwareControllerFactory.java:createController:15) Creating Mock Hardware Controller (Test Mode)
+02-06 23:03:37 [ INFO] (MockHardwareController.java:<init>:28) Mock hardware controller initialized with 8 zones
+02-06 23:03:37 [DEBUG] (RealTimeData.java:<init>:89) RealTimeData initialized with 8 zones
+02-06 23:03:37 [DEBUG] (RealTimeData.java:evalFirstStart:68) First start time set to 2025-06-03 07:30
+02-06 23:03:37 [DEBUG] (Watering.java:main:92) Data structures created
+02-06 23:03:38 [DEBUG] (ArchiveData.java:<init>:29) Connection established
+02-06 23:03:38 [DEBUG] (Watering.java:main:107) Starting Error Handler thread
+02-06 23:03:38 [ INFO] (ErrorsHandlerFactory.java:createErrorsHandler:14) Creating Mock Error Handler (Test Mode)
+02-06 23:03:38 [ INFO] (MockErrorsHandler.java:<init>:11) Initialized Mock Error Handler
+02-06 23:03:38 [DEBUG] (MockErrorsHandler.java:run:16) Mock Errors Handler thread started
+02-06 23:03:38 [DEBUG] (Watering.java:main:123) Starting Sensor Handler thread
+02-06 23:03:38 [DEBUG] (SensorDataHandler.java:<init>:27) SPI thread staring. Getting spi instance from factory
+02-06 23:03:38 [ERROR] (Watering.java:main:129) Exception SPI port setup failed, no SPI available. creating SensorHandler thread
+02-06 23:03:39 [DEBUG] (Watering.java:main:138) Starting Valve 0 Handler thread
+02-06 23:05:02 [DEBUG] (Watering.java:main:88) Got parms from configuration file. DBHOST is 192.168.200.103 (192.168.200.103)
+02-06 23:05:02 [ INFO] (HardwareControllerFactory.java:createController:15) Creating Mock Hardware Controller (Test Mode)
+02-06 23:05:02 [ INFO] (MockHardwareController.java:<init>:28) Mock hardware controller initialized with 8 zones
+02-06 23:05:02 [DEBUG] (RealTimeData.java:<init>:89) RealTimeData initialized with 8 zones
+02-06 23:05:02 [DEBUG] (RealTimeData.java:evalFirstStart:68) First start time set to 2025-06-03 07:30
+02-06 23:05:02 [DEBUG] (Watering.java:main:92) Data structures created
+02-06 23:05:02 [DEBUG] (ArchiveData.java:<init>:29) Connection established
+02-06 23:05:02 [DEBUG] (Watering.java:main:107) Starting Error Handler thread
+02-06 23:05:02 [ INFO] (ErrorsHandlerFactory.java:createErrorsHandler:14) Creating Mock Error Handler (Test Mode)
+02-06 23:05:02 [ INFO] (MockErrorsHandler.java:<init>:11) Initialized Mock Error Handler
+02-06 23:05:02 [DEBUG] (MockErrorsHandler.java:run:16) Mock Errors Handler thread started
+02-06 23:05:03 [DEBUG] (Watering.java:main:123) Starting Sensor Handler thread
+02-06 23:05:03 [DEBUG] (SensorDataHandler.java:<init>:27) SPI thread staring. Getting spi instance from factory
+02-06 23:05:03 [ERROR] (Watering.java:main:129) Exception SPI port setup failed, no SPI available. creating SensorHandler thread
+02-06 23:05:03 [DEBUG] (Watering.java:main:138) Starting Valve 0 Handler thread
+02-06 23:16:42 [DEBUG] (Watering.java:main:93) Got parms from configuration file. DBHOST is 192.168.200.103 (192.168.200.103)
+02-06 23:16:42 [ INFO] (HardwareControllerFactory.java:createController:15) Creating Mock Hardware Controller (Test Mode)
+02-06 23:16:42 [ INFO] (MockHardwareController.java:<init>:28) Mock hardware controller initialized with 8 zones
+02-06 23:16:42 [DEBUG] (RealTimeData.java:<init>:89) RealTimeData initialized with 8 zones
+02-06 23:16:42 [DEBUG] (RealTimeData.java:evalFirstStart:68) First start time set to 2025-06-03 07:30
+02-06 23:16:42 [DEBUG] (Watering.java:main:97) Data structures created
+02-06 23:16:42 [DEBUG] (ArchiveData.java:<init>:29) Connection established
+02-06 23:16:42 [DEBUG] (Watering.java:main:112) Starting Error Handler thread
+02-06 23:16:42 [ INFO] (ErrorsHandlerFactory.java:createErrorsHandler:14) Creating Mock Error Handler (Test Mode)
+02-06 23:16:42 [ INFO] (MockErrorsHandler.java:<init>:11) Initialized Mock Error Handler
+02-06 23:16:42 [ INFO] (SensorDataHandlerFactory.java:createHandler:14) Creating Mock Sensor Data Handler (Test Mode)
+02-06 23:16:42 [DEBUG] (SensorDataHandler.java:<init>:27) SPI thread staring. Getting spi instance from factory
+02-06 23:16:42 [ERROR] (Watering.java:main:117) Exception SPI port setup failed, no SPI available. creating ErrorHandler thread
+02-06 23:16:43 [DEBUG] (Watering.java:main:127) Starting Sensor Handler thread
+02-06 23:16:43 [DEBUG] (SensorDataHandler.java:<init>:27) SPI thread staring. Getting spi instance from factory
+02-06 23:16:43 [ERROR] (Watering.java:main:133) Exception SPI port setup failed, no SPI available. creating SensorHandler thread
+02-06 23:16:43 [DEBUG] (Watering.java:main:142) Starting Valve 0 Handler thread
+02-06 23:36:46 [DEBUG] (Watering.java:main:43) Got parms from configuration file. DBHOST is 192.168.200.103 (192.168.200.103)
+02-06 23:36:46 [ INFO] (HardwareControllerFactory.java:createController:15) Creating Mock Hardware Controller (Test Mode)
+02-06 23:36:46 [ INFO] (MockHardwareController.java:<init>:28) Mock hardware controller initialized with 8 zones
+02-06 23:36:46 [DEBUG] (RealTimeData.java:<init>:89) RealTimeData initialized with 8 zones
+02-06 23:36:46 [DEBUG] (RealTimeData.java:evalFirstStart:68) First start time set to 2025-06-03 07:30
+02-06 23:36:46 [DEBUG] (Watering.java:main:47) Data structures created
+02-06 23:36:46 [DEBUG] (ArchiveData.java:<init>:29) Connection established
+02-06 23:36:46 [DEBUG] (Watering.java:main:60) Starting Error Handler thread
+02-06 23:36:46 [ INFO] (ErrorsHandlerFactory.java:createErrorsHandler:14) Creating Mock Error Handler (Test Mode)
+02-06 23:36:46 [ INFO] (MockErrorsHandler.java:<init>:11) Initialized Mock Error Handler
+02-06 23:36:46 [ INFO] (SensorDataHandlerFactory.java:createHandler:14) Creating Mock Sensor Data Handler (Test Mode)
+02-06 23:36:46 [ INFO] (MockSensorDataHandler.java:<init>:13) Initialized Mock Sensor Data Handler
+02-06 23:36:46 [ INFO] (PumpHandlerFactory.java:createHandler:14) Creating Mock Pump Handler (Test Mode)
+02-06 23:36:46 [ INFO] (MockPumpHandler.java:<init>:11) Initialized Mock Pump Handler
+02-06 23:36:46 [ INFO] (ValveHandlerFactory.java:createHandler:15) Creating Mock Valve Handler (Test Mode) for valve 0
+02-06 23:36:46 [ INFO] (MockValveHandler.java:<init>:16) Initialized Mock Valve Handler for valve 0
+02-06 23:36:46 [ INFO] (ValveHandlerFactory.java:createHandler:15) Creating Mock Valve Handler (Test Mode) for valve 1
+02-06 23:36:46 [ INFO] (MockValveHandler.java:<init>:16) Initialized Mock Valve Handler for valve 1
+02-06 23:36:46 [ INFO] (ValveHandlerFactory.java:createHandler:15) Creating Mock Valve Handler (Test Mode) for valve 2
+02-06 23:36:46 [ INFO] (MockValveHandler.java:<init>:16) Initialized Mock Valve Handler for valve 2
+02-06 23:36:46 [ INFO] (ValveHandlerFactory.java:createHandler:15) Creating Mock Valve Handler (Test Mode) for valve 3
+02-06 23:36:46 [ INFO] (MockValveHandler.java:<init>:16) Initialized Mock Valve Handler for valve 3
+02-06 23:36:46 [ INFO] (ValveHandlerFactory.java:createHandler:15) Creating Mock Valve Handler (Test Mode) for valve 4
+02-06 23:36:46 [ INFO] (MockValveHandler.java:<init>:16) Initialized Mock Valve Handler for valve 4
+02-06 23:36:46 [ INFO] (ValveHandlerFactory.java:createHandler:15) Creating Mock Valve Handler (Test Mode) for valve 5
+02-06 23:36:46 [ INFO] (MockValveHandler.java:<init>:16) Initialized Mock Valve Handler for valve 5
+02-06 23:36:46 [ INFO] (ValveHandlerFactory.java:createHandler:15) Creating Mock Valve Handler (Test Mode) for valve 6
+02-06 23:36:46 [ INFO] (MockValveHandler.java:<init>:16) Initialized Mock Valve Handler for valve 6
+02-06 23:36:46 [ INFO] (ValveHandlerFactory.java:createHandler:15) Creating Mock Valve Handler (Test Mode) for valve 7
+02-06 23:36:46 [ INFO] (MockValveHandler.java:<init>:16) Initialized Mock Valve Handler for valve 7
+02-06 23:36:46 [DEBUG] (MockErrorsHandler.java:run:16) Mock Errors Handler thread started
+02-06 23:36:46 [DEBUG] (MockSensorDataHandler.java:run:18) Mock Sensor Data Handler thread started
+02-06 23:36:46 [DEBUG] (MockValveHandler.java:run:21) Mock Valve Handler thread started for valve 0
+02-06 23:36:46 [DEBUG] (MockValveHandler.java:run:21) Mock Valve Handler thread started for valve 1
+02-06 23:36:46 [DEBUG] (MockPumpHandler.java:run:16) Mock Pump Handler thread started
+02-06 23:36:46 [DEBUG] (MockValveHandler.java:run:21) Mock Valve Handler thread started for valve 4
+02-06 23:36:46 [DEBUG] (MockValveHandler.java:run:21) Mock Valve Handler thread started for valve 3
+02-06 23:36:46 [DEBUG] (MockValveHandler.java:run:21) Mock Valve Handler thread started for valve 2
+02-06 23:36:46 [DEBUG] (MockValveHandler.java:run:21) Mock Valve Handler thread started for valve 7
+02-06 23:36:46 [DEBUG] (MockValveHandler.java:run:21) Mock Valve Handler thread started for valve 6
+02-06 23:36:46 [DEBUG] (MockValveHandler.java:run:21) Mock Valve Handler thread started for valve 5
+02-06 23:36:47 [DEBUG] (Watering.java:main:74) Starting Sensor Handler thread
+02-06 23:36:47 [ INFO] (SensorDataHandlerFactory.java:createHandler:14) Creating Mock Sensor Data Handler (Test Mode)
+02-06 23:36:47 [ INFO] (MockSensorDataHandler.java:<init>:13) Initialized Mock Sensor Data Handler
+02-06 23:36:47 [DEBUG] (MockSensorDataHandler.java:run:18) Mock Sensor Data Handler thread started
+02-06 23:36:47 [DEBUG] (Watering.java:main:89) Starting Valve 0 Handler thread
+02-06 23:36:47 [ INFO] (ValveHandlerFactory.java:createHandler:15) Creating Mock Valve Handler (Test Mode) for valve 0
+02-06 23:36:47 [ INFO] (MockValveHandler.java:<init>:16) Initialized Mock Valve Handler for valve 0
+02-06 23:36:47 [DEBUG] (MockValveHandler.java:run:21) Mock Valve Handler thread started for valve 0
+02-06 23:36:47 [DEBUG] (Watering.java:main:89) Starting Valve 1 Handler thread
+02-06 23:36:47 [ INFO] (ValveHandlerFactory.java:createHandler:15) Creating Mock Valve Handler (Test Mode) for valve 1
+02-06 23:36:47 [ INFO] (MockValveHandler.java:<init>:16) Initialized Mock Valve Handler for valve 1
+02-06 23:36:47 [DEBUG] (MockValveHandler.java:run:21) Mock Valve Handler thread started for valve 1
+02-06 23:36:48 [DEBUG] (Watering.java:main:89) Starting Valve 2 Handler thread
+02-06 23:36:48 [ INFO] (ValveHandlerFactory.java:createHandler:15) Creating Mock Valve Handler (Test Mode) for valve 2
+02-06 23:36:48 [ INFO] (MockValveHandler.java:<init>:16) Initialized Mock Valve Handler for valve 2
+02-06 23:36:48 [DEBUG] (MockValveHandler.java:run:21) Mock Valve Handler thread started for valve 2
+02-06 23:36:48 [DEBUG] (Watering.java:main:89) Starting Valve 3 Handler thread
+02-06 23:36:48 [ INFO] (ValveHandlerFactory.java:createHandler:15) Creating Mock Valve Handler (Test Mode) for valve 3
+02-06 23:36:48 [ INFO] (MockValveHandler.java:<init>:16) Initialized Mock Valve Handler for valve 3
+02-06 23:36:48 [DEBUG] (MockValveHandler.java:run:21) Mock Valve Handler thread started for valve 3
+02-06 23:36:48 [DEBUG] (Watering.java:main:89) Starting Valve 4 Handler thread
+02-06 23:36:48 [ INFO] (ValveHandlerFactory.java:createHandler:15) Creating Mock Valve Handler (Test Mode) for valve 4
+02-06 23:36:48 [ INFO] (MockValveHandler.java:<init>:16) Initialized Mock Valve Handler for valve 4
+02-06 23:36:48 [DEBUG] (MockValveHandler.java:run:21) Mock Valve Handler thread started for valve 4
+02-06 23:36:48 [DEBUG] (Watering.java:main:89) Starting Valve 5 Handler thread
+02-06 23:36:48 [ INFO] (ValveHandlerFactory.java:createHandler:15) Creating Mock Valve Handler (Test Mode) for valve 5
+02-06 23:36:48 [ INFO] (MockValveHandler.java:<init>:16) Initialized Mock Valve Handler for valve 5
+02-06 23:36:48 [DEBUG] (MockValveHandler.java:run:21) Mock Valve Handler thread started for valve 5
+02-06 23:36:49 [DEBUG] (Watering.java:main:89) Starting Valve 6 Handler thread
+02-06 23:36:49 [ INFO] (ValveHandlerFactory.java:createHandler:15) Creating Mock Valve Handler (Test Mode) for valve 6
+02-06 23:36:49 [ INFO] (MockValveHandler.java:<init>:16) Initialized Mock Valve Handler for valve 6
+02-06 23:36:49 [DEBUG] (MockValveHandler.java:run:21) Mock Valve Handler thread started for valve 6
+02-06 23:36:49 [DEBUG] (Watering.java:main:89) Starting Valve 7 Handler thread
+02-06 23:36:49 [ INFO] (ValveHandlerFactory.java:createHandler:15) Creating Mock Valve Handler (Test Mode) for valve 7
+02-06 23:36:49 [ INFO] (MockValveHandler.java:<init>:16) Initialized Mock Valve Handler for valve 7
+02-06 23:36:49 [DEBUG] (MockValveHandler.java:run:21) Mock Valve Handler thread started for valve 7
+02-06 23:36:50 [DEBUG] (Watering.java:main:112) Starting Admin commands thread
+02-06 23:36:50 [ INFO] (AdminCommands.java:<init>:49) Initialized Admin Commands
+02-06 23:36:50 [DEBUG] (AdminCommands.java:run:55) Admin Commands thread started
+02-06 23:36:50 [DEBUG] (Watering.java:main:118) Starting JSON Admin commands thread
+02-06 23:36:50 [ INFO] (JsonAdminCommands.java:<init>:34) JSON TCP interface listening on port 9899
+02-06 23:36:50 [ INFO] (JsonAdminCommands.java:<init>:39) Initialized JSON Admin Commands
+02-06 23:36:50 [DEBUG] (JsonAdminCommands.java:run:44) JSON Admin Commands thread started
+02-06 23:36:51 [DEBUG] (RealTimeData.java:evalFirstStart:68) First start time set to 2025-06-03 07:30
+02-06 23:36:51 [DEBUG] (Watering.java:main:126) First start time set to 2025-06-03 07:30
+02-06 23:36:51 [DEBUG] (Watering.java:main:127) current day of the week 2
+02-06 23:36:51 [ INFO] (MoistureCheck.java:<init>:34) Initialized Moisture Check
+02-06 23:36:51 [DEBUG] (MoistureCheck.java:run:40) Moisture Check thread started
+02-06 23:36:51 [DEBUG] (Watering.java:startDuties:176) Starting duties
+02-06 23:43:53 [DEBUG] (Watering.java:main:43) Got parms from configuration file. DBHOST is 192.168.200.103 (192.168.200.103)
+02-06 23:43:53 [ INFO] (HardwareControllerFactory.java:createController:15) Creating Mock Hardware Controller (Test Mode)
+02-06 23:43:53 [ INFO] (MockHardwareController.java:<init>:28) Mock hardware controller initialized with 8 zones
+02-06 23:43:53 [DEBUG] (RealTimeData.java:<init>:89) RealTimeData initialized with 8 zones
+02-06 23:43:53 [DEBUG] (RealTimeData.java:evalFirstStart:68) First start time set to 2025-06-03 07:30
+02-06 23:43:53 [DEBUG] (Watering.java:main:47) Data structures created
+02-06 23:43:53 [DEBUG] (ArchiveData.java:<init>:29) Connection established
+02-06 23:43:53 [DEBUG] (Watering.java:main:60) Starting Error Handler thread
+02-06 23:43:53 [ INFO] (ErrorsHandlerFactory.java:createErrorsHandler:14) Creating Mock Error Handler (Test Mode)
+02-06 23:43:53 [ INFO] (MockErrorsHandler.java:<init>:11) Initialized Mock Error Handler
+02-06 23:43:53 [ INFO] (SensorDataHandlerFactory.java:createHandler:14) Creating Mock Sensor Data Handler (Test Mode)
+02-06 23:43:53 [ INFO] (MockSensorDataHandler.java:<init>:13) Initialized Mock Sensor Data Handler
+02-06 23:43:53 [ INFO] (PumpHandlerFactory.java:createHandler:14) Creating Mock Pump Handler (Test Mode)
+02-06 23:43:53 [ INFO] (MockPumpHandler.java:<init>:11) Initialized Mock Pump Handler
+02-06 23:43:53 [ INFO] (ValveHandlerFactory.java:createHandler:15) Creating Mock Valve Handler (Test Mode) for valve 0
+02-06 23:43:53 [ INFO] (MockValveHandler.java:<init>:16) Initialized Mock Valve Handler for valve 0
+02-06 23:43:53 [ INFO] (ValveHandlerFactory.java:createHandler:15) Creating Mock Valve Handler (Test Mode) for valve 1
+02-06 23:43:53 [ INFO] (MockValveHandler.java:<init>:16) Initialized Mock Valve Handler for valve 1
+02-06 23:43:53 [ INFO] (ValveHandlerFactory.java:createHandler:15) Creating Mock Valve Handler (Test Mode) for valve 2
+02-06 23:43:53 [ INFO] (MockValveHandler.java:<init>:16) Initialized Mock Valve Handler for valve 2
+02-06 23:43:53 [ INFO] (ValveHandlerFactory.java:createHandler:15) Creating Mock Valve Handler (Test Mode) for valve 3
+02-06 23:43:53 [ INFO] (MockValveHandler.java:<init>:16) Initialized Mock Valve Handler for valve 3
+02-06 23:43:53 [ INFO] (ValveHandlerFactory.java:createHandler:15) Creating Mock Valve Handler (Test Mode) for valve 4
+02-06 23:43:53 [ INFO] (MockValveHandler.java:<init>:16) Initialized Mock Valve Handler for valve 4
+02-06 23:43:53 [ INFO] (ValveHandlerFactory.java:createHandler:15) Creating Mock Valve Handler (Test Mode) for valve 5
+02-06 23:43:53 [ INFO] (MockValveHandler.java:<init>:16) Initialized Mock Valve Handler for valve 5
+02-06 23:43:53 [ INFO] (ValveHandlerFactory.java:createHandler:15) Creating Mock Valve Handler (Test Mode) for valve 6
+02-06 23:43:53 [ INFO] (MockValveHandler.java:<init>:16) Initialized Mock Valve Handler for valve 6
+02-06 23:43:53 [ INFO] (ValveHandlerFactory.java:createHandler:15) Creating Mock Valve Handler (Test Mode) for valve 7
+02-06 23:43:53 [ INFO] (MockValveHandler.java:<init>:16) Initialized Mock Valve Handler for valve 7
+02-06 23:43:53 [DEBUG] (MockErrorsHandler.java:run:16) Mock Errors Handler thread started
+02-06 23:43:53 [DEBUG] (MockSensorDataHandler.java:run:18) Mock Sensor Data Handler thread started
+02-06 23:43:53 [DEBUG] (MockPumpHandler.java:run:16) Mock Pump Handler thread started
+02-06 23:43:53 [DEBUG] (MockValveHandler.java:run:21) Mock Valve Handler thread started for valve 2
+02-06 23:43:53 [DEBUG] (MockValveHandler.java:run:21) Mock Valve Handler thread started for valve 1
+02-06 23:43:53 [DEBUG] (MockValveHandler.java:run:21) Mock Valve Handler thread started for valve 0
+02-06 23:43:53 [DEBUG] (MockValveHandler.java:run:21) Mock Valve Handler thread started for valve 7
+02-06 23:43:53 [DEBUG] (MockValveHandler.java:run:21) Mock Valve Handler thread started for valve 6
+02-06 23:43:53 [DEBUG] (MockValveHandler.java:run:21) Mock Valve Handler thread started for valve 5
+02-06 23:43:53 [DEBUG] (MockValveHandler.java:run:21) Mock Valve Handler thread started for valve 4
+02-06 23:43:53 [DEBUG] (MockValveHandler.java:run:21) Mock Valve Handler thread started for valve 3
+02-06 23:43:54 [DEBUG] (Watering.java:main:74) Starting Sensor Handler thread
+02-06 23:43:54 [ INFO] (SensorDataHandlerFactory.java:createHandler:14) Creating Mock Sensor Data Handler (Test Mode)
+02-06 23:43:54 [ INFO] (MockSensorDataHandler.java:<init>:13) Initialized Mock Sensor Data Handler
+02-06 23:43:54 [DEBUG] (MockSensorDataHandler.java:run:18) Mock Sensor Data Handler thread started
+02-06 23:43:54 [DEBUG] (Watering.java:main:89) Starting Valve 0 Handler thread
+02-06 23:43:54 [ INFO] (ValveHandlerFactory.java:createHandler:15) Creating Mock Valve Handler (Test Mode) for valve 0
+02-06 23:43:54 [ INFO] (MockValveHandler.java:<init>:16) Initialized Mock Valve Handler for valve 0
+02-06 23:43:54 [DEBUG] (MockValveHandler.java:run:21) Mock Valve Handler thread started for valve 0
+02-06 23:43:55 [DEBUG] (Watering.java:main:89) Starting Valve 1 Handler thread
+02-06 23:43:55 [ INFO] (ValveHandlerFactory.java:createHandler:15) Creating Mock Valve Handler (Test Mode) for valve 1
+02-06 23:43:55 [ INFO] (MockValveHandler.java:<init>:16) Initialized Mock Valve Handler for valve 1
+02-06 23:43:55 [DEBUG] (MockValveHandler.java:run:21) Mock Valve Handler thread started for valve 1
+02-06 23:43:55 [DEBUG] (Watering.java:main:89) Starting Valve 2 Handler thread
+02-06 23:43:55 [ INFO] (ValveHandlerFactory.java:createHandler:15) Creating Mock Valve Handler (Test Mode) for valve 2
+02-06 23:43:55 [ INFO] (MockValveHandler.java:<init>:16) Initialized Mock Valve Handler for valve 2
+02-06 23:43:55 [DEBUG] (MockValveHandler.java:run:21) Mock Valve Handler thread started for valve 2
+02-06 23:43:55 [DEBUG] (Watering.java:main:89) Starting Valve 3 Handler thread
+02-06 23:43:55 [ INFO] (ValveHandlerFactory.java:createHandler:15) Creating Mock Valve Handler (Test Mode) for valve 3
+02-06 23:43:55 [ INFO] (MockValveHandler.java:<init>:16) Initialized Mock Valve Handler for valve 3
+02-06 23:43:55 [DEBUG] (MockValveHandler.java:run:21) Mock Valve Handler thread started for valve 3
+02-06 23:43:55 [DEBUG] (Watering.java:main:89) Starting Valve 4 Handler thread
+02-06 23:43:55 [ INFO] (ValveHandlerFactory.java:createHandler:15) Creating Mock Valve Handler (Test Mode) for valve 4
+02-06 23:43:55 [ INFO] (MockValveHandler.java:<init>:16) Initialized Mock Valve Handler for valve 4
+02-06 23:43:55 [DEBUG] (MockValveHandler.java:run:21) Mock Valve Handler thread started for valve 4
+02-06 23:43:56 [DEBUG] (Watering.java:main:89) Starting Valve 5 Handler thread
+02-06 23:43:56 [ INFO] (ValveHandlerFactory.java:createHandler:15) Creating Mock Valve Handler (Test Mode) for valve 5
+02-06 23:43:56 [ INFO] (MockValveHandler.java:<init>:16) Initialized Mock Valve Handler for valve 5
+02-06 23:43:56 [DEBUG] (MockValveHandler.java:run:21) Mock Valve Handler thread started for valve 5
+02-06 23:43:56 [DEBUG] (Watering.java:main:89) Starting Valve 6 Handler thread
+02-06 23:43:56 [ INFO] (ValveHandlerFactory.java:createHandler:15) Creating Mock Valve Handler (Test Mode) for valve 6
+02-06 23:43:56 [ INFO] (MockValveHandler.java:<init>:16) Initialized Mock Valve Handler for valve 6
+02-06 23:43:56 [DEBUG] (MockValveHandler.java:run:21) Mock Valve Handler thread started for valve 6
+02-06 23:43:56 [DEBUG] (Watering.java:main:89) Starting Valve 7 Handler thread
+02-06 23:43:56 [ INFO] (ValveHandlerFactory.java:createHandler:15) Creating Mock Valve Handler (Test Mode) for valve 7
+02-06 23:43:56 [ INFO] (MockValveHandler.java:<init>:16) Initialized Mock Valve Handler for valve 7
+02-06 23:43:56 [DEBUG] (MockValveHandler.java:run:21) Mock Valve Handler thread started for valve 7
+02-06 23:43:57 [DEBUG] (Watering.java:main:112) Starting Admin commands thread
+02-06 23:43:57 [ INFO] (AdminCommands.java:<init>:49) Initialized Admin Commands
+02-06 23:43:57 [DEBUG] (AdminCommands.java:run:55) Admin Commands thread started
+02-06 23:43:57 [DEBUG] (Watering.java:main:118) Starting JSON Admin commands thread
+02-06 23:43:57 [ INFO] (JsonAdminCommands.java:<init>:34) JSON TCP interface listening on port 9899
+02-06 23:43:57 [ INFO] (JsonAdminCommands.java:<init>:39) Initialized JSON Admin Commands
+02-06 23:43:57 [DEBUG] (JsonAdminCommands.java:run:44) JSON Admin Commands thread started
+02-06 23:43:58 [DEBUG] (RealTimeData.java:evalFirstStart:68) First start time set to 2025-06-03 07:30
+02-06 23:43:58 [DEBUG] (Watering.java:main:126) First start time set to 2025-06-03 07:30
+02-06 23:43:58 [DEBUG] (Watering.java:main:127) current day of the week 2
+02-06 23:43:58 [ INFO] (MoistureCheck.java:<init>:34) Initialized Moisture Check
+02-06 23:43:58 [DEBUG] (MoistureCheck.java:run:40) Moisture Check thread started
+02-06 23:43:58 [DEBUG] (Watering.java:startDuties:176) Starting duties

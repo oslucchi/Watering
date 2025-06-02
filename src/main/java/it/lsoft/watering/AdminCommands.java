@@ -3,6 +3,7 @@ package it.lsoft.watering;
 import it.lsoft.watering.Commons.Errors;
 import it.lsoft.watering.Commons.Parameters;
 import it.lsoft.watering.Raspberry.RealTimeData;
+import it.lsoft.watering.Raspberry.IWateringHandler;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -18,7 +19,7 @@ import java.util.StringTokenizer;
 
 import org.apache.log4j.Logger;
 
-public class AdminCommands extends Thread 
+public class AdminCommands extends Thread implements IWateringHandler
 {
 	private ServerSocket serverSocket = null;
 	private Parameters parms;
@@ -27,7 +28,7 @@ public class AdminCommands extends Thread
 	private String input = "";
 	private RealTimeData rtData;
 
-	private final Logger logger = Logger.getLogger(AdminCommands.class);
+	private static final Logger logger = Logger.getLogger(AdminCommands.class);
 	
 	public AdminCommands(RealTimeData rtData)
 	{
@@ -45,11 +46,14 @@ public class AdminCommands extends Thread
 			}
 		}
 		this.rtData = rtData;
+		logger.info("Initialized Admin Commands");
 	}
 
+	@Override
 	public void run() 
 	{
-        Socket clientSocket = null;
+		logger.debug("Admin Commands thread started");
+		Socket clientSocket = null;
 		br = new BufferedReader(new InputStreamReader(System.in));
 		wr = new BufferedWriter(new OutputStreamWriter(System.out));
 		while(!rtData.isShutDown())
@@ -449,6 +453,13 @@ public class AdminCommands extends Thread
 			{
 				logger.fatal("Watering console could not be started. Shutting down");
 				rtData.setShutDown(true);
+			}
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				logger.error("Error in admin commands: " + e.getMessage());
+				Thread.currentThread().interrupt();
+				break;
 			}
 		}
 	}

@@ -8,6 +8,8 @@ import java.util.Date;
 import org.apache.log4j.Logger;
 
 import it.lsoft.watering.Commons.Parameters;
+import it.lsoft.watering.hardware.HardwareControllerFactory;
+import it.lsoft.watering.hardware.IHardwareController;
 
 public class RealTimeData 
 {
@@ -40,7 +42,8 @@ public class RealTimeData
 	private SimpleDateFormat longFmt = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 	private int nextStart = 0;
 	
-
+	private final IHardwareController hardware;
+	
 	static Logger logger = Logger.getLogger(RealTimeData.class);
 	public void evalFirstStart()
 	{
@@ -82,6 +85,8 @@ public class RealTimeData
 		{
 			valveStatus[i] = false;
 		}
+		this.hardware = HardwareControllerFactory.createController(parms);
+		logger.debug("RealTimeData initialized with " + parms.getZones() + " zones");
 		evalFirstStart();
 	}
 	
@@ -235,6 +240,9 @@ public class RealTimeData
 
 	public void setShutDown(boolean shutDown) {
 		this.shutDown = shutDown;
+		if (shutDown) {
+			hardware.shutdown();
+		}
 	}
 
 	public boolean isForceManual() {
@@ -400,5 +408,17 @@ public class RealTimeData
 
 	public void setSkipZoneFlag(boolean skipZoneFlag) {
 		this.skipZoneFlag = skipZoneFlag;
+	}
+
+	public void setPumpStatus(boolean status) {
+		hardware.setPumpStatus(status);
+	}
+
+	public Integer readMoistureFromSensor(int sensorId) {
+		return hardware.readMoisture(sensorId);
+	}
+
+	public Integer readSensorValue(int sensorId) {
+		return hardware.readSensorValue(sensorId);
 	}
 }
