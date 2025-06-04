@@ -1,2 +1,11 @@
 /bin/
 /target/
+
+# Log files
+app.log
+Watering.log
+
+# Configuration files
+configshow_response.txt
+Watering.ini
+Watering.ini.*

@@ -210,11 +210,11 @@ public class JsonAdminCommands extends Thread implements IWateringHandler {
                     String skipWhat = command.getParameters()[0].toString();
                     switch (skipWhat) {
                         case "z":
-                            rtData.setMode("zone");
+                            rtData.setSkipZoneFlag(true);
                             rtData.setErrorCode(rtData.getErrorCode() & 0b111111101111111111111111);
                             return new JsonResponse(JsonResponse.Status.OK, "Skip current zone");
                         case "c":
-                            rtData.setMode("cycle");
+                            rtData.setSkipCycleFlag(true);
                             rtData.setErrorCode(rtData.getErrorCode() | 0b000000010000000000000000);
                             return new JsonResponse(JsonResponse.Status.OK, "Skip current cycle");
                         default:
