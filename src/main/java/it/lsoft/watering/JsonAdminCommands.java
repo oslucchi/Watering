@@ -51,6 +51,7 @@ public class JsonAdminCommands extends Thread implements IWateringHandler {
 
                 String input = reader.readLine();
                 if (input != null) {
+                    logger.debug("JSON Admin Commands thread received command: '" + input + "'");
                     JsonCommand command = gson.fromJson(input, JsonCommand.class);
                     JsonResponse response = executeCommand(command);
                     writer.write(gson.toJson(response) + "\n");
@@ -69,6 +70,9 @@ public class JsonAdminCommands extends Thread implements IWateringHandler {
         }
 
         try {
+            logger.debug("JSON Admin Commands thread received command: '" + 
+                            command.getCommand().toLowerCase() + 
+                            "' with parameters: " + command.getParameters());
             switch (command.getCommand().toLowerCase()) {
                 case "configshow":
                     try {
@@ -82,7 +86,7 @@ public class JsonAdminCommands extends Thread implements IWateringHandler {
 
                 case "configsave":
                     if (command.getParameters() == null || command.getParameters().length == 0) {
-                        return new JsonResponse(JsonResponse.Status.NOK, "Configuration content required");
+                        return new JsonResponse(JsonResponse.Status.NOK, "Configuration data required");
                     }
                     try {
                         // Create backup with timestamp
@@ -118,15 +122,17 @@ public class JsonAdminCommands extends Thread implements IWateringHandler {
                     }
                     status.append("Humidity from sensors:\n");
                     for (int i = 0; i < parms.getNumberOfSensors(); i++) {
-                        status.append(String.format("Sensor %d %2.2f\n", i, rtData.getMoisture(i)));
+                        status.append("Sensor ").append(i).append(" ")
+                              .append(String.format("%2.2f", rtData.getMoisture(i))).append("\n");
                     }
-                    status.append("Watering is ").append(rtData.getInCycle() < 0 ? "inactive" : "active on zone " + rtData.getInCycle()).append("\n");
+                    status.append("Watering is ")
+                          .append(rtData.getInCycle() < 0 ? "inactive\n" : "active on zone " + rtData.getInCycle() + ":\n");
                     if (rtData.getInCycle() >= 0) {
                         for (int i = 0; i < parms.getZones(); i++) {
-                            status.append(String.format("Zone %d %s%s\n", 
-                                i, 
-                                rtData.getValveStatus(i) ? "watering" : "off",
-                                rtData.getValveStatus(i) ? " since " + rtData.getWateringTimeElapsed(i) + " sec" : ""));
+                            status.append("Zone ").append(i).append(" ")
+                                  .append(rtData.getValveStatus(i) ? "watering" : "   off  ")
+                                  .append(rtData.getValveStatus(i) ? " since " + rtData.getWateringTimeElapsed(i) + " sec" : "")
+                                  .append("\n");
                         }
                     }
                     status.append("Disable flag is   : ").append(rtData.isDisableFlag()).append("\n");
@@ -176,6 +182,62 @@ public class JsonAdminCommands extends Thread implements IWateringHandler {
                     } catch (NumberFormatException e) {
                         return new JsonResponse(JsonResponse.Status.NOK, 
                             "Malformatted schedule parameter: " + command.getParameters()[0]);
+                    }
+
+                case "mode":
+                    if (command.getParameters() == null || command.getParameters().length == 0) {
+                        return new JsonResponse(JsonResponse.Status.NOK, "Mode parameter required (a/m)");
+                    }
+                    String mode = command.getParameters()[0].toString();
+                    switch (mode) {
+                        case "a":
+                            rtData.setMode("auto");
+                            rtData.setErrorCode(rtData.getErrorCode() & 0b111111101111111111111111);
+                            String autoNextStart = "Re-evaluated next start time to " + rtData.getNextStartTime();
+                            return new JsonResponse(JsonResponse.Status.OK, autoNextStart);
+                        case "m":
+                            rtData.setMode("manual");
+                            rtData.setErrorCode(rtData.getErrorCode() | 0b000000010000000000000000);
+                            return new JsonResponse(JsonResponse.Status.OK, "Switched to manual mode");
+                        default:
+                            return new JsonResponse(JsonResponse.Status.NOK, "Invalid mode. Use 'a' for auto or 'm' for manual");
+                    }
+
+                case "skip":
+                    if (command.getParameters() == null || command.getParameters().length == 0) {
+                        return new JsonResponse(JsonResponse.Status.NOK, "Mode parameter required (a/m)");
+                    }
+                    String skipWhat = command.getParameters()[0].toString();
+                    switch (skipWhat) {
+                        case "z":
+                            rtData.setMode("zone");
+                            rtData.setErrorCode(rtData.getErrorCode() & 0b111111101111111111111111);
+                            return new JsonResponse(JsonResponse.Status.OK, "Skip current zone");
+                        case "c":
+                            rtData.setMode("cycle");
+                            rtData.setErrorCode(rtData.getErrorCode() | 0b000000010000000000000000);
+                            return new JsonResponse(JsonResponse.Status.OK, "Skip current cycle");
+                        default:
+                            return new JsonResponse(JsonResponse.Status.NOK, "Invalid mode. Use 'z' for zone or 'c' for cycle");
+                    }
+
+                case "start":
+                case "stop":
+                    if (command.getParameters() == null || command.getParameters().length == 0) {
+                        return new JsonResponse(JsonResponse.Status.NOK, "Zone parameter required");
+                    }
+                    try {
+                        int zone = Integer.parseInt(command.getParameters()[0].toString());
+                        if (zone >= 0 && zone < parms.getZones()) {
+                            rtData.setValveStatus(zone, command.getCommand().equals("start"));
+                            return new JsonResponse(JsonResponse.Status.OK, null);
+                        } else {
+                            return new JsonResponse(JsonResponse.Status.NOK, 
+                                "Invalid zone. Valid ids are from 0 to " + (parms.getZones() - 1));
+                        }
+                    } catch (NumberFormatException e) {
+                        return new JsonResponse(JsonResponse.Status.NOK, 
+                            "Malformatted zone parameter: " + command.getParameters()[0]);
                     }
 
                 default:
