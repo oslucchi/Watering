@@ -15,19 +15,25 @@ import it.lsoft.watering.Exceptions.WateringException;
 public class DBConnection 
 {
 	final Logger log = Logger.getLogger(this.getClass());
-    private ResultSet rs = null;
-    private ResultSetMetaData rsm = null;
-    private Statement st = null;
-	private Connection conn = null;
-	private static DBConnection singletonInstance = new DBConnection();
+    protected ResultSet rs = null;
+    protected ResultSetMetaData rsm = null;
+    protected Statement st = null;
+	protected Connection conn = null;
+	private static DBConnection singletonInstance = null;
 	
-	private DBConnection()
+	protected DBConnection()
 	{
 		return;
 	}
 
 	public void getConnection() throws WateringException  
 	{		
+        // Skip actual connection in test mode
+        if (isTestMode()) {
+            log.debug("Test mode: Skipping actual database connection");
+            return;
+        }
+
     	String retVal = null;
  		Exception e1 = null;
 		try
@@ -61,6 +67,11 @@ public class DBConnection
     
 	protected void finalize() 
 	{
+        if (isTestMode()) {
+            log.debug("Test mode: Skipping database cleanup");
+            return;
+        }
+
 		// log.debug("Closing resources");
 		try 
 		{
@@ -86,6 +97,13 @@ public class DBConnection
 	
 	public void executeQuery(String sql, boolean logStatement) throws Exception
 	{
+        if (isTestMode()) {
+            if (logStatement) {
+                log.debug("Test mode: Skipping SQL execution: " + sql);
+            }
+            return;
+        }
+
 		if (logStatement) 
 		{
 			log.debug("executing query '"  + sql + "'");
@@ -150,17 +168,18 @@ public class DBConnection
 	
 	public static DBConnection getInstance() throws WateringException
 	{
-		if ((singletonInstance.conn == null) || 
-			(singletonInstance.st == null))
-		{
-			try 
-			{
-				singletonInstance.finalize();
-			}
-			catch (Throwable e) 
-			{
+		// Check if we're in test mode
+		if (isTestMode()) {
+			return MockDBConnection.getInstance();
+		}
+
+		if (singletonInstance == null || singletonInstance.conn == null || singletonInstance.st == null) {
+			try {
+				if (singletonInstance != null) {
+					singletonInstance.finalize();
+				}
+			} catch (Throwable e) {
 				// no actions
-				;
 			}
 			singletonInstance = new DBConnection();
 		}
@@ -168,4 +187,9 @@ public class DBConnection
 		singletonInstance.getConnection();
 		return singletonInstance;
 	}
+
+    protected static boolean isTestMode() {
+        String testMode = System.getenv("WATERING_TEST_MODE");
+        return testMode != null && testMode.equals("true");
+    }
 }

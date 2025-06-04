@@ -7,41 +7,18 @@ public class JsonResponse {
     }
 
     private Status status;
-    private int msgLen;
-    private byte[] data;
+    private String data;
 
-    public JsonResponse() {
-        // Default constructor for JSON serialization
-    }
-
-    public JsonResponse(Status status, byte[] data) {
+    public JsonResponse(Status status, String data) {
         this.status = status;
         this.data = data;
-        this.msgLen = data != null ? data.length : 0;
     }
 
     public Status getStatus() {
         return status;
     }
 
-    public void setStatus(Status status) {
-        this.status = status;
-    }
-
-    public int getMsgLen() {
-        return msgLen;
-    }
-
-    public void setMsgLen(int msgLen) {
-        this.msgLen = msgLen;
-    }
-
-    public byte[] getData() {
+    public String getData() {
         return data;
-    }
-
-    public void setData(byte[] data) {
-        this.data = data;
-        this.msgLen = data != null ? data.length : 0;
     }
 } 

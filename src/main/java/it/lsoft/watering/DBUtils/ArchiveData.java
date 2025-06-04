@@ -14,25 +14,38 @@ public class ArchiveData extends Thread implements AutoCloseable
 	private RealTimeData rtData;
 	static Logger logger = Logger.getLogger(ArchiveData.class);
 	private DBConnection conn = null;
+	private boolean isTestMode;
 
 	public ArchiveData(RealTimeData appData)
 	{
 		this.rtData = appData;
-		try
-		{
-			conn = DBConnection.getInstance();
+		this.isTestMode = System.getenv("WATERING_TEST_MODE") != null && 
+						 System.getenv("WATERING_TEST_MODE").equals("true");
+		
+		if (!isTestMode) {
+			try {
+				conn = DBConnection.getInstance();
+				logger.debug("Database connection established");
+			} catch(Exception e) {
+				logger.warn("Exception " + e.getMessage() + " connecting to DB");
+			}
+		} else {
+			logger.info("Running in test mode - database operations will be skipped");
+			// In test mode, use MockDBConnection to avoid actual DB operations
+			try {
+				conn = MockDBConnection.getInstance();
+			} catch(Exception e) {
+				logger.warn("Exception creating mock DB connection: " + e.getMessage());
+			}
 		}
-		catch(Exception e)
-		{
-			logger.warn("Exception " + e.getMessage() + " connecting to DB");
-		}
-		logger.debug("Connection established");
 	}
 
 	public void close() throws Exception 
 	{
-		logger.debug("Closing connection");
-		conn.finalize();
+		if (conn != null) {
+			logger.debug("Closing " + (isTestMode ? "mock " : "") + "connection");
+			conn.finalize();
+		}
 	}
 	
 	public void archive(int type, int unityId, double value)
@@ -42,8 +55,14 @@ public class ArchiveData extends Thread implements AutoCloseable
 
 	public void archive(int type, int unityId, double value, double readValue, double rangeFrom, double rangeTo)
 	{
-		if (!rtData.getParms().isEnableDbArchive())
+		if (!rtData.getParms().isEnableDbArchive() || isTestMode) {
+			if (isTestMode) {
+				logger.debug("Test mode: Skipping archive operation - type: " + type + 
+						   ", unityId: " + unityId + ", value: " + value);
+			}
 			return;
+		}
+
 		try
 		{
 			History hist = new History();

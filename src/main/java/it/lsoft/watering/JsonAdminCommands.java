@@ -7,11 +7,10 @@ import it.lsoft.watering.Commons.Parameters;
 import it.lsoft.watering.Raspberry.RealTimeData;
 import it.lsoft.watering.Raspberry.IWateringHandler;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.*;
+import java.nio.file.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.net.ServerSocket;
 import java.net.Socket;
 import org.apache.log4j.Logger;
@@ -23,6 +22,7 @@ public class JsonAdminCommands extends Thread implements IWateringHandler {
     private final Parameters parms;
     private final Gson gson;
     private static final Logger logger = Logger.getLogger(JsonAdminCommands.class);
+    private static final String CONFIG_FILE = "conf/Watering.ini";
 
     public JsonAdminCommands(RealTimeData rtData) {
         this.rtData = rtData;
@@ -45,6 +45,7 @@ public class JsonAdminCommands extends Thread implements IWateringHandler {
         while (!rtData.isShutDown()) {
             try {
                 Socket clientSocket = serverSocket.accept();
+                logger.debug("JSON Admin Commands thread accepted connection from " + clientSocket.getInetAddress().getHostAddress());
                 BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                 BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
 
@@ -64,11 +65,50 @@ public class JsonAdminCommands extends Thread implements IWateringHandler {
 
     private JsonResponse executeCommand(JsonCommand command) {
         if (command == null || command.getCommand() == null) {
-            return new JsonResponse(JsonResponse.Status.NOK, "Invalid command format".getBytes());
+            return new JsonResponse(JsonResponse.Status.NOK, "Invalid command format");
         }
 
         try {
             switch (command.getCommand().toLowerCase()) {
+                case "configshow":
+                    try {
+                        String content = new String(Files.readAllBytes(Paths.get(CONFIG_FILE)));
+                        return new JsonResponse(JsonResponse.Status.OK, content);
+                    } catch (IOException e) {
+                        logger.error("Error reading configuration file: " + e.getMessage());
+                        return new JsonResponse(JsonResponse.Status.NOK, 
+                            "Error reading configuration file: " + e.getMessage());
+                    }
+
+                case "configsave":
+                    if (command.getParameters() == null || command.getParameters().length == 0) {
+                        return new JsonResponse(JsonResponse.Status.NOK, "Configuration content required");
+                    }
+                    try {
+                        // Create backup with timestamp
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyMMddHHmmss");
+                        String timestamp = sdf.format(new Date());
+                        String backupFile = CONFIG_FILE + "." + timestamp;
+                        
+                        // Backup existing file
+                        Files.copy(Paths.get(CONFIG_FILE), Paths.get(backupFile), StandardCopyOption.REPLACE_EXISTING);
+                        logger.info("Created backup file: " + backupFile);
+                        
+                        // Save new configuration
+                        String newConfig = command.getParameters()[0].toString();
+                        Files.write(Paths.get(CONFIG_FILE), newConfig.getBytes());
+                        
+                        // Reload configuration
+                        rtData.setParms(parms.rescan());
+                        
+                        return new JsonResponse(JsonResponse.Status.OK, 
+                            "Configuration saved and reloaded. Backup created: " + backupFile);
+                    } catch (IOException e) {
+                        logger.error("Error saving configuration file: " + e.getMessage());
+                        return new JsonResponse(JsonResponse.Status.NOK, 
+                            "Error saving configuration file: " + e.getMessage());
+                    }
+
                 case "status":
                     StringBuilder status = new StringBuilder();
                     if (rtData.getMode().compareTo("manual") == 0) {
@@ -99,7 +139,7 @@ public class JsonAdminCommands extends Thread implements IWateringHandler {
                     if (rtData.getDelayByMinutes() > 0) {
                         status.append("Start delayed by: ").append(rtData.getDelayByMinutes()).append(" min\n");
                     }
-                    return new JsonResponse(JsonResponse.Status.OK, status.toString().getBytes());
+                    return new JsonResponse(JsonResponse.Status.OK, status.toString());
 
                 case "disable":
                     rtData.setDisableFlag(true);
@@ -108,42 +148,42 @@ public class JsonAdminCommands extends Thread implements IWateringHandler {
                 case "enable":
                     rtData.setDisableFlag(false);
                     String nextStart = "Re-evaluated next start time to " + rtData.getNextStartTime();
-                    return new JsonResponse(JsonResponse.Status.OK, nextStart.getBytes());
+                    return new JsonResponse(JsonResponse.Status.OK, nextStart);
 
                 case "suspend":
                     rtData.setSuspendFlag(true);
                     return new JsonResponse(JsonResponse.Status.OK, 
-                        ("Suspend flag is now: " + rtData.isSuspendFlag()).getBytes());
+                        "Suspend flag is now: " + rtData.isSuspendFlag());
 
                 case "resume":
                     rtData.setSuspendFlag(false);
                     return new JsonResponse(JsonResponse.Status.OK, 
-                        ("Suspend flag is now: " + rtData.isSuspendFlag()).getBytes());
+                        "Suspend flag is now: " + rtData.isSuspendFlag());
 
                 case "startman":
                     if (command.getParameters() == null || command.getParameters().length == 0) {
-                        return new JsonResponse(JsonResponse.Status.NOK, "Schedule parameter required".getBytes());
+                        return new JsonResponse(JsonResponse.Status.NOK, "Schedule parameter required");
                     }
                     try {
                         int schedule = Integer.parseInt(command.getParameters()[0].toString());
                         if (schedule < 0 || schedule > parms.getNumberOfSchedules()) {
                             return new JsonResponse(JsonResponse.Status.NOK, 
-                                ("Invalid schedule. Value permitted from 0 to " + parms.getNumberOfSchedules()).getBytes());
+                                "Invalid schedule. Value permitted from 0 to " + parms.getNumberOfSchedules());
                         }
                         rtData.setForceManual(true);
                         rtData.setScheduleIndex(schedule);
                         return new JsonResponse(JsonResponse.Status.OK, null);
                     } catch (NumberFormatException e) {
                         return new JsonResponse(JsonResponse.Status.NOK, 
-                            ("Malformatted schedule parameter: " + command.getParameters()[0]).getBytes());
+                            "Malformatted schedule parameter: " + command.getParameters()[0]);
                     }
 
                 default:
-                    return new JsonResponse(JsonResponse.Status.NOK, "Unknown command".getBytes());
+                    return new JsonResponse(JsonResponse.Status.NOK, "Unknown command");
             }
         } catch (Exception e) {
             logger.error("Error executing command: " + e.getMessage(), e);
-            return new JsonResponse(JsonResponse.Status.NOK, ("Error: " + e.getMessage()).getBytes());
+            return new JsonResponse(JsonResponse.Status.NOK, "Error: " + e.getMessage());
         }
     }
 } 
