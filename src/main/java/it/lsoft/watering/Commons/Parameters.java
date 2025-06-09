@@ -18,6 +18,7 @@ public class Parameters
 {
 	static Logger logger = Logger.getLogger(Parameters.class);
 
+	private String runMode = "m";
 	private int zones;
 	private int[] durationZone;
 	private int stopIfMoistureIsGreater;
@@ -102,6 +103,7 @@ public class Parameters
 			System.exit(-1);
 		}
 		
+		runMode = ini.get("general", "mode");
 		zones = Integer.parseInt(ini.get("general", "zones"));
 		durationZone = new int [zones];
 		valveGPIOZone = new int[zones];
@@ -479,4 +481,13 @@ public class Parameters
 	public int getValveCount() {
 		return zones;
 	}
+
+	public static String getConfFilePath() {
+		return confFilePath;
+	}
+
+	public String getRunMode() {
+		return runMode;
+	}
+	
 }

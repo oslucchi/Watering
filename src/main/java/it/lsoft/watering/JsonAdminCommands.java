@@ -4,12 +4,15 @@ import com.google.gson.Gson;
 import it.lsoft.watering.Commons.JsonCommand;
 import it.lsoft.watering.Commons.JsonResponse;
 import it.lsoft.watering.Commons.Parameters;
+import it.lsoft.watering.Commons.Status;
 import it.lsoft.watering.Raspberry.RealTimeData;
 import it.lsoft.watering.Raspberry.IWateringHandler;
 
 import java.io.*;
 import java.nio.file.*;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -21,12 +24,14 @@ public class JsonAdminCommands extends Thread implements IWateringHandler {
     private final RealTimeData rtData;
     private final Parameters parms;
     private final Gson gson;
+    private Status status = null;
+
     private static final Logger logger = Logger.getLogger(JsonAdminCommands.class);
-    private static final String CONFIG_FILE = "conf/Watering.ini";
 
     public JsonAdminCommands(RealTimeData rtData) {
         this.rtData = rtData;
         this.parms = rtData.getParms();
+    	status = new Status(parms);
         this.gson = new Gson();
         
         try {
@@ -76,7 +81,7 @@ public class JsonAdminCommands extends Thread implements IWateringHandler {
             switch (command.getCommand().toLowerCase()) {
                 case "configshow":
                     try {
-                        String content = new String(Files.readAllBytes(Paths.get(CONFIG_FILE)));
+                        String content = new String(Files.readAllBytes(Paths.get(Parameters.getConfFilePath())));
                         return new JsonResponse(JsonResponse.Status.OK, content);
                     } catch (IOException e) {
                         logger.error("Error reading configuration file: " + e.getMessage());
@@ -92,15 +97,15 @@ public class JsonAdminCommands extends Thread implements IWateringHandler {
                         // Create backup with timestamp
                         SimpleDateFormat sdf = new SimpleDateFormat("yyMMddHHmmss");
                         String timestamp = sdf.format(new Date());
-                        String backupFile = CONFIG_FILE + "." + timestamp;
+                        String backupFile = Parameters.getConfFilePath() + "." + timestamp;
                         
                         // Backup existing file
-                        Files.copy(Paths.get(CONFIG_FILE), Paths.get(backupFile), StandardCopyOption.REPLACE_EXISTING);
+                        Files.copy(Paths.get(Parameters.getConfFilePath()), Paths.get(backupFile), StandardCopyOption.REPLACE_EXISTING);
                         logger.info("Created backup file: " + backupFile);
                         
                         // Save new configuration
                         String newConfig = command.getParameters()[0].toString();
-                        Files.write(Paths.get(CONFIG_FILE), newConfig.getBytes());
+                        Files.write(Paths.get(Parameters.getConfFilePath()), newConfig.getBytes());
                         
                         // Reload configuration
                         rtData.setParms(parms.rescan());
@@ -114,7 +119,58 @@ public class JsonAdminCommands extends Thread implements IWateringHandler {
                     }
 
                 case "status":
-                    StringBuilder status = new StringBuilder();
+                	Status s = new Status(parms);
+                    boolean [] flags = s.getFlags();                    
+                    int[] curWateringTime = s.getCurWateringTime();
+                    Arrays.fill(curWateringTime , 0);
+                    int[] expWateringTime = curWateringTime;
+                    
+                    flags[Status.FLG_MODE] = (rtData.getMode().compareTo("manual") == 0);
+
+                    boolean[] watering = s.getWatering();
+                    Calendar cal = Calendar.getInstance();
+            		cal.setTime(new Date());
+            		int dayOfTheWeek = cal.get(Calendar.DAY_OF_WEEK);
+            		
+                    for(int i = 0; i < watering.length; i++)
+                    {
+                        flags[Status.FLG_WATERING] |= rtData.getValveStatus(i);;
+                    	watering[i] = rtData.getValveStatus(i);
+                    	if (watering[i])
+                        {
+                    		curWateringTime[i] = rtData.getWateringTimeElapsed(i);
+                        }
+                    	else
+                    	{
+                    		curWateringTime[i] = 0;
+                    	}
+                        expWateringTime[i] = parms.getZoneDuration(i, rtData, dayOfTheWeek);
+                    }
+                    s.setCurWateringTime(curWateringTime);
+                    s.setExpWateringTime(expWateringTime);
+                    
+                    double[] moistures = s.getMoisture();
+                    for (int i = 0; i < parms.getNumberOfSensors(); i++) {
+                        moistures[i] = rtData.getMoisture(i);
+                    }
+                    s.setMoisture(moistures);
+                    
+                    flags[Status.FLG_DISABLE] = rtData.isDisableFlag(); 
+                    flags[Status.FLG_SUSPEND] = rtData.isSuspendFlag();
+					flags[Status.FLG_SKIP] = rtData.isSkipCycleFlag();
+					flags[Status.FLG_FORCE] = rtData.isForceManual();
+					flags[Status.FLG_AUTOSKIP] = parms.isEnableAutoSkip();
+					flags[Status.FLG_SENSOR_DUMP] = rtData.getParms().isDumpSensorReading();                    
+                    s.setFlags(flags);
+                    
+                    if (!status.equals(s))
+                    {
+                    	s.setVersionId(status.getVersionId() + 1);
+                    	status = s;
+                    }
+                    /*
+                    StringBuilder status = new StringBuilder();                    
+
                     if (rtData.getMode().compareTo("manual") == 0) {
                         status.append("The system is running in manual mode\n");
                     } else {
@@ -145,7 +201,8 @@ public class JsonAdminCommands extends Thread implements IWateringHandler {
                     if (rtData.getDelayByMinutes() > 0) {
                         status.append("Start delayed by: ").append(rtData.getDelayByMinutes()).append(" min\n");
                     }
-                    return new JsonResponse(JsonResponse.Status.OK, status.toString());
+                    */
+                    return new JsonResponse(JsonResponse.Status.OK, gson.toJson(status));
 
                 case "disable":
                     rtData.setDisableFlag(true);

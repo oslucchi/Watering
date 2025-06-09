@@ -1,14 +1,13 @@
 package it.lsoft.watering;
 
-import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 
+import it.lsoft.watering.Commons.Errors;
 import it.lsoft.watering.Commons.Parameters;
 import it.lsoft.watering.DBUtils.ArchiveData;
 import it.lsoft.watering.DBUtils.History;
@@ -44,9 +43,19 @@ public class Watering {
 					 " (" + System.getProperty("DBHOST") + ")");
 		
 		rtData = new RealTimeData(parms);
-		logger.debug("Data structures created");
-		
 		rtData.setErrorCode(0);
+		logger.debug("Data structures created");
+		switch(parms.getRunMode())
+		{
+		case "a":
+			rtData.setMode("auto");
+			rtData.setErrorCode(rtData.getErrorCode() & 0b111111101111111111111111);
+			break;
+		case "m":
+			rtData.setMode("manual");
+			rtData.setErrorCode(rtData.getErrorCode() | Errors.STATUS_MANUAL);
+			break;
+		}
 
 		if((args.length >= 2) && (args[1].compareTo("disable") == 0))
 		{
