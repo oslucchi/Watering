@@ -1,6 +1,8 @@
 package it.lsoft.watering.Raspberry;
 
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.apache.log4j.Logger;
 
 public class MockSensorDataHandler extends Thread implements IWateringHandler {
@@ -12,10 +14,17 @@ public class MockSensorDataHandler extends Thread implements IWateringHandler {
         this.rtData = rtData;
         logger.info("Initialized Mock Sensor Data Handler");
     }
+	private final AtomicBoolean initialized = new AtomicBoolean(false);
+
+	@Override
+	public boolean isInitialized() {
+	    return initialized.get();
+	}
 
     @Override
     public void run() {
         logger.debug("Mock Sensor Data Handler thread started");
+    	initialized.set(true);	
         while (!rtData.isShutDown()) {
             try {
                 // Simulate moisture readings between 30-70%

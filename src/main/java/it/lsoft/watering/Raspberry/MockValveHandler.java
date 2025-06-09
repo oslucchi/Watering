@@ -1,5 +1,7 @@
 package it.lsoft.watering.Raspberry;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.apache.log4j.Logger;
 import it.lsoft.watering.DBUtils.ArchiveData;
 
@@ -15,11 +17,18 @@ public class MockValveHandler extends Thread implements IWateringHandler {
         this.ad = ad;
         logger.info("Initialized Mock Valve Handler for valve " + valveId);
     }
+	private final AtomicBoolean initialized = new AtomicBoolean(false);
+
+	@Override
+	public boolean isInitialized() {
+	    return initialized.get();
+	}
 
     @Override
     public void run() {
         logger.debug("Mock Valve Handler thread started for valve " + valveId);
         int elapsed = 0;
+    	initialized.set(true);	
         while (!rtData.isShutDown()) {
             try {
                 if (rtData.getValveStatus(valveId)) {

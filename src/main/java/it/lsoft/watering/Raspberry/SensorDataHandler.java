@@ -1,6 +1,7 @@
 package it.lsoft.watering.Raspberry;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.log4j.Logger;
 
@@ -9,7 +10,6 @@ import com.pi4j.io.spi.SpiDevice;
 import com.pi4j.io.spi.SpiFactory;
 
 import it.lsoft.watering.Commons.Parameters;
-import it.lsoft.watering.Raspberry.IWateringHandler;
 
 public class SensorDataHandler extends Thread implements IWateringHandler
 {
@@ -20,6 +20,7 @@ public class SensorDataHandler extends Thread implements IWateringHandler
 	private static Double[][] lastMeasures = null;
 	
 	static Logger logger = Logger.getLogger(SensorDataHandler.class);
+	private final AtomicBoolean initialized = new AtomicBoolean(false);
 	
 	public SensorDataHandler(RealTimeData rtData) throws IOException
 	{
@@ -98,7 +99,12 @@ public class SensorDataHandler extends Thread implements IWateringHandler
 			return sum / population;
 		}
 	}
-	
+
+	@Override
+	public boolean isInitialized() {
+	    return initialized.get();
+	}
+
 	@Override
 	public void run() 
 	{
@@ -106,6 +112,7 @@ public class SensorDataHandler extends Thread implements IWateringHandler
 		int warmUp = parms.getMeasuresToConsider();
 		logger.debug("Using " + warmUp + " measures to warmup");
 		logger.debug("Sensor Handler thread started");
+		initialized.set(true);	
 		try 
 		{
 			while(!rtData.isShutDown())

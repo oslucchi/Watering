@@ -50,6 +50,13 @@ public class AdminCommands extends Thread implements IWateringHandler
 	}
 
 	@Override
+	public boolean isInitialized() {
+	    return true;
+	}
+
+
+	@SuppressWarnings("resource")
+	@Override
 	public void run() 
 	{
 		logger.debug("Admin Commands thread started");

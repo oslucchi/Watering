@@ -1,6 +1,7 @@
 package it.lsoft.watering.Raspberry;
 
 import java.util.EnumSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.log4j.Logger;
 
@@ -27,6 +28,7 @@ public class PumpHandler extends Thread implements IWateringHandler
 	private String pinName;
 	
 	static Logger logger = Logger.getLogger(PumpHandler.class);
+	private final AtomicBoolean initialized = new AtomicBoolean(false);
 
 	public PumpHandler(RealTimeData rtData)
 	{
@@ -43,11 +45,18 @@ public class PumpHandler extends Thread implements IWateringHandler
 	}
 
 	@Override
+	public boolean isInitialized() {
+	    return initialized.get();
+	}
+
+	@Override
 	public void run() 
 	{
 		logger.debug("Pump Handler thread started");
 		int i = 0;
 		boolean printDebug = true;
+		initialized.set(true);	
+
 		while(!rtData.isShutDown())
 		{
 			parms = rtData.getParms();

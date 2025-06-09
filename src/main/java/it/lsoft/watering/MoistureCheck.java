@@ -2,6 +2,7 @@ package it.lsoft.watering;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.log4j.Logger;
 
@@ -27,11 +28,17 @@ public class MoistureCheck extends Thread implements IWateringHandler
 	private Parameters parms = null;
 
 	private static final Logger logger = Logger.getLogger(MoistureCheck.class);
+	private final AtomicBoolean initialized = new AtomicBoolean(false);
 
 	public MoistureCheck(RealTimeData rtData)
 	{
 		this.rtData = rtData;
 		logger.info("Initialized Moisture Check");
+	}
+
+	@Override
+	public boolean isInitialized() {
+	    return initialized.get();
 	}
 	
 	@Override
@@ -40,7 +47,7 @@ public class MoistureCheck extends Thread implements IWateringHandler
 		logger.debug("Moisture Check thread started");
 		SimpleDateFormat longFmt = rtData.getLongFmt();
 		parms = rtData.getParms();
-		
+		initialized.set(true);	
 		while (!rtData.isShutDown())
 		{
 			try 

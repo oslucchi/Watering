@@ -43,6 +43,12 @@ public class JsonAdminCommands extends Thread implements IWateringHandler {
         }
         logger.info("Initialized JSON Admin Commands");
     }
+    
+	@Override
+	public boolean isInitialized() {
+	    return true;
+	}
+
 
     @Override
     public void run() {

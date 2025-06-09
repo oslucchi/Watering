@@ -56,6 +56,7 @@ public class Watering {
 			rtData.setErrorCode(rtData.getErrorCode() | Errors.STATUS_MANUAL);
 			break;
 		}
+		logger.debug("System will be running in '" + rtData.getMode() + "' mode" );
 
 		if((args.length >= 2) && (args[1].compareTo("disable") == 0))
 		{
@@ -145,12 +146,12 @@ public class Watering {
 		{
 			sleep(3000);
 			done = true;
-			if ((sensorHandler != null) && sensorHandler.isAlive())
+			if ((sensorHandler != null) && sensorHandler.isInitialized())
 			{
 				logger.trace("Sensor handler still alive");
 				done = false;
 			}
-			if ((pumpHandler != null) && pumpHandler.isAlive())
+			if ((pumpHandler != null) && pumpHandler.isInitialized())
 			{
 				logger.trace("Pump handler still alive");
 				done = false;
@@ -159,14 +160,14 @@ public class Watering {
 			{
 				for(int i = 0; i < parms.getZones(); i++)
 				{
-					if ((valveHandlers[i] != null) && valveHandlers[i].isAlive())
+					if ((valveHandlers[i] != null) && valveHandlers[i].isInitialized())
 					{
 						logger.trace("Valve " + i + " handler still alive");
 						done = false;
 					}
 				}
 			}
-			if ((errorsHandler != null) && errorsHandler.isAlive())
+			if ((errorsHandler != null) && errorsHandler.isInitialized())
 			{
 				logger.trace("Error handler still alive");
 				done = false;
@@ -336,7 +337,7 @@ public class Watering {
 	
 	private static void checkAndStartThreads()
 	{
-		if ((errorsHandler == null) || !errorsHandler.isAlive())
+		if ((errorsHandler == null) || !errorsHandler.isInitialized())
 		{
 			logger.debug("Restarting Error Handler thread");
 			errorsHandler = null;
@@ -351,7 +352,7 @@ public class Watering {
 			}
 		}
 
-		if (parms.isUseMoistureSensor() && ((sensorHandler == null) || !sensorHandler.isAlive()))
+		if (parms.isUseMoistureSensor() && ((sensorHandler == null) || !sensorHandler.isInitialized()))
 		{
 			logger.debug("Restarting Sensor Handler thread");
 			sensorHandler = null;
@@ -366,7 +367,7 @@ public class Watering {
 			}
 		}
 		
-		if (parms.isEnablePump() && ((pumpHandler == null) || !pumpHandler.isAlive()))
+		if (parms.isEnablePump() && ((pumpHandler == null) || !pumpHandler.isInitialized()))
 		{
 			logger.debug("Restarting Pump Handler thread");
 			pumpHandler = null;
@@ -385,7 +386,7 @@ public class Watering {
 		{
 			for(int i = 0; i < parms.getZones(); i++)
 			{
-				if ((valveHandlers[i] == null) || !valveHandlers[i].isAlive())
+				if ((valveHandlers[i] == null) || !valveHandlers[i].isInitialized())
 				{
 					logger.debug("Restarting Valve Handler " + i + " thread");
 					valveHandlers[i] = null;
@@ -403,7 +404,7 @@ public class Watering {
 		}
 		if (parms.isEnableAutoSkip())
 		{
-			if ((mc == null) || ! mc.isAlive())
+			if ((mc == null) || ! mc.isInitialized())
 			{
 				logger.debug("Starting Moisture check thread");
 				rtData.setRunMoistureCheck(true);

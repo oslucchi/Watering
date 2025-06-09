@@ -4,6 +4,7 @@ import it.lsoft.watering.Commons.Parameters;
 
 import java.util.Date;
 import java.util.EnumSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.log4j.Logger;
 
@@ -35,6 +36,8 @@ public class ErrorsHandler extends Thread implements IWateringHandler
 	private Date pressStart; 
 
 	static Logger logger = Logger.getLogger(ErrorsHandler.class);
+	private final AtomicBoolean initialized = new AtomicBoolean(false);
+
 
 	public ErrorsHandler(RealTimeData appData) throws Exception
 	{
@@ -106,6 +109,11 @@ public class ErrorsHandler extends Thread implements IWateringHandler
 			}
 		);
 	}
+	
+	@Override
+	public boolean isInitialized() {
+	    return initialized.get();
+	}
 
 	@Override
 	public void run() 
@@ -114,6 +122,7 @@ public class ErrorsHandler extends Thread implements IWateringHandler
 		byte[] countFlash = {0, 0, 0};
 		byte[] countOff = {0, 0, 0};
 		long errCode = 0;
+		initialized.set(true);	
 		while(!rtData.isShutDown())
 		{	
 			parms = rtData.getParms();

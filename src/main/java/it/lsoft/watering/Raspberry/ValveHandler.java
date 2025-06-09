@@ -1,6 +1,7 @@
 package it.lsoft.watering.Raspberry;
 
 import java.util.EnumSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.log4j.Logger;
 
@@ -31,6 +32,8 @@ public class ValveHandler extends Thread implements IWateringHandler
 	private int secondsElapsed= 0;
 	private int instance;
 	private Parameters parms = null;
+	private final AtomicBoolean initialized = new AtomicBoolean(false);
+
 
 	static Logger logger = Logger.getLogger(ValveHandler.class);
 	
@@ -86,12 +89,27 @@ public class ValveHandler extends Thread implements IWateringHandler
 		}
 		return false;
 	}
+	
+	
+	@Override
+	public boolean isInitialized() {
+	    return initialized.get();
+	}
+
 
 	@Override
 	public void run() 
 	{
-		logger.debug("Valve Handler " + instance + " started");
-		boolean stopDueToMoistureLevel = false;
+		boolean stopDueToMoistureLevel = parms.isEnableAutoSkip();
+		try {
+			logger.debug("Valve Handler " + instance + " started");
+			initialized.set(true);
+		}
+		catch(Throwable t)
+		{
+			logger.error("Unhandled exception in ValveHandler " + instance, t);
+		}
+		
 		while(!rtData.isShutDown())
 		{
 			parms = rtData.getParms();

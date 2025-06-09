@@ -1,5 +1,7 @@
 package it.lsoft.watering.Raspberry;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.apache.log4j.Logger;
 
 public class MockPumpHandler extends Thread implements IWateringHandler {
@@ -10,10 +12,17 @@ public class MockPumpHandler extends Thread implements IWateringHandler {
         this.rtData = rtData;
         logger.info("Initialized Mock Pump Handler");
     }
+	private final AtomicBoolean initialized = new AtomicBoolean(false);
+
+	@Override
+	public boolean isInitialized() {
+	    return initialized.get();
+	}
 
     @Override
     public void run() {
         logger.debug("Mock Pump Handler thread started");
+    	initialized.set(true);	
         while (!rtData.isShutDown()) {
             try {
                 Thread.sleep(1000);
