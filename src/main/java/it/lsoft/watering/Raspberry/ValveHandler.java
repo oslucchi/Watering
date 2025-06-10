@@ -19,6 +19,7 @@ import it.lsoft.watering.Commons.Errors;
 import it.lsoft.watering.Commons.Parameters;
 import it.lsoft.watering.DBUtils.ArchiveData;
 import it.lsoft.watering.DBUtils.History;
+import jdk.internal.org.jline.utils.Log;
 
 public class ValveHandler extends Thread implements IWateringHandler
 {
@@ -51,6 +52,7 @@ public class ValveHandler extends Thread implements IWateringHandler
 				                   PinPullResistance.all()); 
 		pin = gpio.provisionDigitalOutputPin(pinDescr, pinName, 
 						(parms.getHighValue() == 1 ? PinState.LOW : PinState.HIGH));
+		initialized.set(true);
 	}
 	
 	private void setPinHigh()
@@ -93,23 +95,16 @@ public class ValveHandler extends Thread implements IWateringHandler
 	
 	@Override
 	public boolean isInitialized() {
+		logger.debug("returning " + initialized.get()); 
 	    return initialized.get();
 	}
-
-
+	
 	@Override
 	public void run() 
 	{
+		logger.debug("Valve Handler " + instance + " started");
 		boolean stopDueToMoistureLevel = parms.isEnableAutoSkip();
-		try {
-			logger.debug("Valve Handler " + instance + " started");
-			initialized.set(true);
-		}
-		catch(Throwable t)
-		{
-			logger.error("Unhandled exception in ValveHandler " + instance, t);
-		}
-		
+
 		while(!rtData.isShutDown())
 		{
 			parms = rtData.getParms();
