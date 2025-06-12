@@ -95,7 +95,6 @@ public class ValveHandler extends Thread implements IWateringHandler
 	
 	@Override
 	public boolean isInitialized() {
-		logger.debug("returning " + initialized.get()); 
 	    return initialized.get();
 	}
 	

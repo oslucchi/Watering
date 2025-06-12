@@ -1,5 +1,7 @@
 package it.lsoft.watering;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 //import java.text.ParseException;
 //import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -10,6 +12,7 @@ import org.apache.log4j.Logger;
 import it.lsoft.watering.Commons.Errors;
 import it.lsoft.watering.Commons.Parameters;
 import it.lsoft.watering.DBUtils.ArchiveData;
+import it.lsoft.watering.DBUtils.History;
 //import it.lsoft.watering.DBUtils.History;
 import it.lsoft.watering.Raspberry.*;
 
@@ -23,11 +26,11 @@ public class Watering {
 	private static MoistureCheck mc;
 	private static final Logger logger = Logger.getLogger(Watering.class);
 	private static Parameters parms = null;
-//	private static Date now;
-//	private static Date lastArchive;
-//	private static int dayOfTheWeek;
-//	private static SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
-//	private static SimpleDateFormat longFmt = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+	private static Date now;
+	private static Date lastArchive;
+	private static int dayOfTheWeek;
+	private static SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+	private static SimpleDateFormat longFmt = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 	private static int inCycle = -1;
 
 	public static void main(String[] args) {
@@ -65,49 +68,8 @@ public class Watering {
 
 		ad = new ArchiveData(rtData);
 		sleep(500);	
-		
-		if (parms.isUseMoistureSensor())
-		{
-			try 
-			{
-				logger.debug("Starting Sensor Handler thread");
-				sensorHandler = SensorDataHandlerFactory.createHandler(rtData);
-				sensorHandler.start();
-			}
-			catch (Exception e)
-			{
-				logger.error("Exception " + e.getMessage() + " creating SensorHandler thread");
-			}
-			sleep(500);
-		}		
 
-		valveHandlers = new IWateringHandler[parms.getZones()];
-		for(int i = 0; i < parms.getZones(); i++)
-		{
-			try {
-				logger.debug("Starting Valve " + i + " Handler thread");
-				valveHandlers[i] = ValveHandlerFactory.createHandler(rtData, i, ad);
-				valveHandlers[i].start();
-				logger.debug("valveHandlers[" + i + "] is set to " + valveHandlers[i]);
-				sleep(250);	
-			} catch (Exception e) {
-				logger.error("Exception " + e.getMessage() + " creating ValveHandler thread");
-			}
-		}
-		sleep(500);
-
-		if (parms.isEnablePump())
-		{
-			try {
-				logger.debug("Starting Pump Handler thread");
-				pumpHandler = PumpHandlerFactory.createHandler(rtData);
-				pumpHandler.start();
-				sleep(500);
-			} catch (Exception e) {
-				logger.error("Exception " + e.getMessage() + " creating PumpHandler thread");
-			}
-		}
-		
+		// Start user command interfaces
 		AdminCommands ac;
 		logger.debug("Starting Admin commands thread");
 		ac = new AdminCommands(rtData);
@@ -120,6 +82,10 @@ public class Watering {
 		jsonAc.start();
 		sleep(500);
 		
+		// start handlers
+		startHandlers();
+		
+		// initialize data for cycle automation
 		rtData.setInCycle(inCycle);
 		rtData.evalFirstStart();
 
@@ -133,6 +99,8 @@ public class Watering {
 				logger.debug("[" + i + "]: " + valveHandlers[i]);
 			}
 		}
+		
+		// start the effective job
 		startDuties();
 
 		sleep(3000);
@@ -174,6 +142,50 @@ public class Watering {
 		System.exit(0);
 	}
 		
+	private static void startHandlers() {
+		if (parms.isUseMoistureSensor())
+		{
+			try 
+			{
+				logger.debug("Starting Sensor Handler thread");
+				sensorHandler = SensorDataHandlerFactory.createHandler(rtData);
+				sensorHandler.start();
+			}
+			catch (Exception e)
+			{
+				logger.error("Exception " + e.getMessage() + " creating SensorHandler thread");
+			}
+			sleep(500);
+		}		
+
+		valveHandlers = new IWateringHandler[parms.getZones()];
+		for(int i = 0; i < parms.getZones(); i++)
+		{
+			try {
+				logger.debug("Starting Valve " + i + " Handler thread");
+				valveHandlers[i] = ValveHandlerFactory.createHandler(rtData, i, ad);
+				valveHandlers[i].start();
+				logger.debug("valveHandlers[" + i + "] is set to " + valveHandlers[i]);
+				sleep(250);	
+			} catch (Exception e) {
+				logger.error("Exception " + e.getMessage() + " creating ValveHandler thread");
+			}
+		}
+		sleep(500);
+
+		if (parms.isEnablePump())
+		{
+			try {
+				logger.debug("Starting Pump Handler thread");
+				pumpHandler = PumpHandlerFactory.createHandler(rtData);
+				pumpHandler.start();
+				sleep(500);
+			} catch (Exception e) {
+				logger.error("Exception " + e.getMessage() + " creating PumpHandler thread");
+			}
+		}		
+	}
+
 	private static void startDuties()
 	{
 		mc = new MoistureCheck(rtData);
@@ -184,11 +196,11 @@ public class Watering {
 		while (!rtData.isShutDown()) 
 		{
 			checkAndStartThreads();
+			isTimeToStart();
 			sleep(1000);
 		}
 	}
 
-	/*
 	private static boolean isTimeToStart()
 	{
 		if (rtData.isRequiredChangeOnStartTime())
@@ -331,7 +343,6 @@ public class Watering {
 				   rtData.getSensorReadValue(sensordId), rtData.getSensorRangeFrom(sensordId), rtData.getSensorRangeTo(sensordId));
 		}
 	}
-	*/
 	
 	private static void checkAndStartThreads()
 	{

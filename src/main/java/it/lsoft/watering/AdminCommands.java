@@ -469,5 +469,13 @@ public class AdminCommands extends Thread implements IWateringHandler
 				break;
 			}
 		}
+		try {
+			br.close();
+			wr.close();
+		}
+		catch(Throwable t)
+		{
+			;
+		}
 	}
 }

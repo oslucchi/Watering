@@ -174,40 +174,6 @@ public class JsonAdminCommands extends Thread implements IWateringHandler {
                     	s.setVersionId(status.getVersionId() + 1);
                     	status = s;
                     }
-                    /*
-                    StringBuilder status = new StringBuilder();                    
-
-                    if (rtData.getMode().compareTo("manual") == 0) {
-                        status.append("The system is running in manual mode\n");
-                    } else {
-                        status.append("Next startup at: ").append(rtData.getNextStartTime()).append("\n");
-                    }
-                    status.append("Humidity from sensors:\n");
-                    for (int i = 0; i < parms.getNumberOfSensors(); i++) {
-                        status.append("Sensor ").append(i).append(" ")
-                              .append(String.format("%2.2f", rtData.getMoisture(i))).append("\n");
-                    }
-                    status.append("Watering is ")
-                          .append(rtData.getInCycle() < 0 ? "inactive\n" : "active on zone " + rtData.getInCycle() + ":\n");
-                    if (rtData.getInCycle() >= 0) {
-                        for (int i = 0; i < parms.getZones(); i++) {
-                            status.append("Zone ").append(i).append(" ")
-                                  .append(rtData.getValveStatus(i) ? "watering" : "   off  ")
-                                  .append(rtData.getValveStatus(i) ? " since " + rtData.getWateringTimeElapsed(i) + " sec" : "")
-                                  .append("\n");
-                        }
-                    }
-                    status.append("Disable flag is   : ").append(rtData.isDisableFlag()).append("\n");
-                    status.append("Suspend flag is   : ").append(rtData.isSuspendFlag()).append("\n");
-                    status.append("Skip flag is      : ").append(rtData.isSkipCycleFlag()).append("\n");
-                    status.append("Force flag is     : ").append(rtData.isForceManual()).append("\n");
-                    status.append("AutoSkip flag is  : ").append(parms.isEnableAutoSkip()).append("\n");
-                    status.append("Error code is     : ").append(rtData.getErrorCode()).append("\n");
-                    status.append("Sensor dumping is : ").append(rtData.getParms().isDumpSensorReading()).append("\n");
-                    if (rtData.getDelayByMinutes() > 0) {
-                        status.append("Start delayed by: ").append(rtData.getDelayByMinutes()).append(" min\n");
-                    }
-                    */
                     return new JsonResponse(JsonResponse.Status.OK, gson.toJson(status));
 
                 case "disable":
@@ -241,11 +207,11 @@ public class JsonAdminCommands extends Thread implements IWateringHandler {
                         }
                         rtData.setForceManual(true);
                         rtData.setScheduleIndex(schedule);
-                        return new JsonResponse(JsonResponse.Status.OK, null);
                     } catch (NumberFormatException e) {
                         return new JsonResponse(JsonResponse.Status.NOK, 
                             "Malformatted schedule parameter: " + command.getParameters()[0]);
                     }
+                    return new JsonResponse(JsonResponse.Status.OK, null);
 
                 case "mode":
                     if (command.getParameters() == null || command.getParameters().length == 0) {
