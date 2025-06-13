@@ -20,6 +20,7 @@ public class RealTimeData
 	private double[] sensorRangeTo;
 	private boolean[] valveStatus;
 	private int[] wateringTimeElapsed;
+	private int[] wateringTimeTarget;
 	private boolean shutDown = false;
 	private boolean runMoistureCheck = false;
 	private boolean forceManual = false;
@@ -80,6 +81,7 @@ public class RealTimeData
 		this.sensorRangeFrom = new double[parms.getNumberOfSensors()];
 		this.sensorRangeTo = new double[parms.getNumberOfSensors()];
 		this.wateringTimeElapsed = new int[parms.getZones()];
+		this.wateringTimeTarget = new int[parms.getZones()];
 		this.valveStatus = new boolean[parms.getZones()];
 		for(int i = 0; i < parms.getZones(); i++)
 		{
@@ -192,21 +194,6 @@ public class RealTimeData
 	public void setSensorRangeTo(int pos, double value) 
 	{
 		this.sensorRangeTo[pos] = value;
-	}
-	
-	public int[] getWateringTimeElapsed() 
-	{
-		return wateringTimeElapsed;
-	}
-	
-	public int getWateringTimeElapsed(int pos) 
-	{
-		return wateringTimeElapsed[pos];
-	}
-	
-	public void setWateringTimeElapsed(int pos, int wateringTimeElapsed) 
-	{
-		this.wateringTimeElapsed[pos] = wateringTimeElapsed;
 	}
 
 	public boolean[] getValveStatus() 
@@ -421,4 +408,32 @@ public class RealTimeData
 	public Integer readSensorValue(int sensorId) {
 		return hardware.readSensorValue(sensorId);
 	}
+
+	public int[] getWateringTimeTarget() {
+		return wateringTimeTarget;
+	}
+	
+	public int getWateringTimeTarget(int zone) {
+		return wateringTimeTarget[zone];
+	}
+
+	public void setWateringTimeTarget(int zone, int target) {
+		this.wateringTimeTarget[zone] = target;
+	}
+	
+	public int[] getWateringTimeElapsed() 
+	{
+		return wateringTimeElapsed;
+	}
+	
+	public int getWateringTimeElapsed(int pos) 
+	{
+		return wateringTimeElapsed[pos];
+	}
+	
+	public void setWateringTimeElapsed(int pos, int wateringTimeElapsed) 
+	{
+		this.wateringTimeElapsed[pos] = wateringTimeElapsed;
+	}
+	
 }

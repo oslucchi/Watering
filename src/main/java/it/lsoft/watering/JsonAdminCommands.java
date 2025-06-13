@@ -11,7 +11,6 @@ import it.lsoft.watering.Raspberry.IWateringHandler;
 import java.io.*;
 import java.nio.file.*;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.net.ServerSocket;
@@ -126,34 +125,22 @@ public class JsonAdminCommands extends Thread implements IWateringHandler {
 
                 case "status":
                 	Status s = new Status(parms);
-                    boolean [] flags = s.getFlags();                    
-                    int[] curWateringTime = s.getCurWateringTime();
-                    Arrays.fill(curWateringTime , 0);
-                    int[] expWateringTime = curWateringTime;
+                	s.setCurrentArea(rtData.getInCycle());
+                    boolean [] flags = s.getFlags();
                     
                     flags[Status.FLG_MODE] = (rtData.getMode().compareTo("manual") == 0);
 
                     boolean[] watering = s.getWatering();
                     Calendar cal = Calendar.getInstance();
             		cal.setTime(new Date());
-            		int dayOfTheWeek = cal.get(Calendar.DAY_OF_WEEK);
             		
                     for(int i = 0; i < watering.length; i++)
                     {
                         flags[Status.FLG_WATERING] |= rtData.getValveStatus(i);;
                     	watering[i] = rtData.getValveStatus(i);
-                    	if (watering[i])
-                        {
-                    		curWateringTime[i] = rtData.getWateringTimeElapsed(i);
-                        }
-                    	else
-                    	{
-                    		curWateringTime[i] = 0;
-                    	}
-                        expWateringTime[i] = parms.getZoneDuration(i, rtData, dayOfTheWeek);
                     }
-                    s.setCurWateringTime(curWateringTime);
-                    s.setExpWateringTime(expWateringTime);
+                    s.setCurWateringTime(rtData.getWateringTimeElapsed());
+                    s.setExpWateringTime(rtData.getWateringTimeTarget());
                     
                     double[] moistures = s.getMoisture();
                     for (int i = 0; i < parms.getNumberOfSensors(); i++) {
@@ -211,6 +198,10 @@ public class JsonAdminCommands extends Thread implements IWateringHandler {
                         return new JsonResponse(JsonResponse.Status.NOK, 
                             "Malformatted schedule parameter: " + command.getParameters()[0]);
                     }
+                    return new JsonResponse(JsonResponse.Status.OK, null);
+
+                case "stopman":
+                    rtData.setSkipCycleFlag(true);
                     return new JsonResponse(JsonResponse.Status.OK, null);
 
                 case "mode":

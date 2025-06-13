@@ -31,7 +31,6 @@ public class Watering {
 	private static int dayOfTheWeek;
 	private static SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
 	private static SimpleDateFormat longFmt = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-	private static int inCycle = -1;
 
 	public static void main(String[] args) {
 		if (args.length < 1) {
@@ -86,7 +85,6 @@ public class Watering {
 		startHandlers();
 		
 		// initialize data for cycle automation
-		rtData.setInCycle(inCycle);
 		rtData.evalFirstStart();
 
 		logger.debug("First start time set to " + rtData.getNextStartTime());
@@ -192,6 +190,7 @@ public class Watering {
 		mc.start();
 		sleep(500);
 
+		rtData.setInCycle(-1);
 		logger.debug("Starting duties");
 		while (!rtData.isShutDown()) 
 		{
@@ -205,10 +204,10 @@ public class Watering {
 	{
 		if (rtData.isRequiredChangeOnStartTime())
 		{
+			logger.warn("Requested to delay the start by " + rtData.getDelayByMinutes() + 
+					" minutes from the original timestamp " );
 			// A delay on the start time has been requested. Evaluate the new starting time
 			rtData.setRequiredChangeOnStartTime(false);
-			logger.warn("Requested to delay the start by " + rtData.getDelayByMinutes() + 
-						" minutes from the original timestamp " );
 			try
 			{
 				logger.warn("Original start time was set to " + rtData.getNextStartTime());
@@ -223,29 +222,37 @@ public class Watering {
 				e.printStackTrace();
 			}
 		}
-		
-		if (! ((inCycle >= 0) || (longFmt.format(now).compareTo(rtData.getNextStartTime()) == 0) || rtData.isForceManual()))
+		now = new Date();
+		if (lastArchive == null)
 		{
+			lastArchive = new Date(now.getTime() - 60000);
+		}
+		
+		if ((rtData.getInCycle() < 0) && !rtData.isForceManual() && 
+			(longFmt.format(now).compareTo(rtData.getNextStartTime()) < 0))
+		{
+			logger.trace("no reasons to evaluate a start" );
 			return false;
 		}
 		
 		if (rtData.isDisableFlag())
 		{
+			logger.trace("a request to disable watering has been received" );
 			// request to disable watering raised
-			if (inCycle >= 0)
+			if (rtData.getInCycle() >= 0)
 			{
+				logger.trace("watering is active on valve " + rtData.getInCycle() + ". Disable it");
 				// we are in watering phase. stop watering and reset the cycle indicator
 				// Archive the watering time for the current zone
-				ad.archive(History.TYPE_WATERING_TIME, inCycle, rtData.getWateringTimeElapsed(inCycle));
+				ad.archive(History.TYPE_WATERING_TIME, rtData.getInCycle(), rtData.getWateringTimeElapsed(rtData.getInCycle()));
 				
 				// Switch off the current zone valve
-				rtData.setValveStatus(inCycle, false);
+				rtData.setValveStatus(rtData.getInCycle(), false);
 				logger.debug("Watering terminated due to disable flag");
 			}
 			rtData.evalNextStartTime(true);
 			logger.debug("Reavaluated next start time to " + rtData.getNextStartTime());
-			inCycle = -1;
-			rtData.setInCycle(inCycle);
+			rtData.setInCycle(-1);
 			rtData.setForceManual(false);
 			rtData.setSkipCycleFlag(false);
 			rtData.setSuspendFlag(false);
@@ -263,29 +270,35 @@ public class Watering {
 			rtData.setSkipCycleFlag(false);
 			rtData.setForceManual(false);
 			rtData.setSuspendFlag(false);
+            for(int zone = 0; zone < parms.getZones(); zone++)
+            {
+            	rtData.setValveStatus(zone, false);
+            }
+            rtData.setInCycle(-1);
 			return false;
 		}
 
 		boolean newCycleStarting = false;
-		if (inCycle == -1)
+		if (rtData.getInCycle() == -1)
 		{
+			logger.trace("Conditions are set to start a new cycle");
 			newCycleStarting = true;
+			rtData.setLastWateringSession(now);
 			// it's a new start requested
 			// A start is effectively requested. Archive all moistures
 			archiveAllMoistures(true, History.TYPE_MOISTURE_AT_START);
 
-			inCycle = 0;
 			rtData.setInCycle(0);
 			rtData.setLastStart(now);
 			// Find the first zone with a watering time > 0
-			while((parms.getDuration(rtData, dayOfTheWeek) == 0) && (inCycle < parms.getZones()))
+			while((parms.getDuration(rtData, dayOfTheWeek) == 0) && (rtData.getInCycle() < parms.getZones()))
 			{
-				inCycle++;
-				rtData.setInCycle(inCycle);
+				rtData.setInCycle(rtData.getInCycle() + 1);
 			}
+			logger.trace("The first area to water will be " + rtData.getInCycle());
 		}
 
-		if (inCycle >= parms.getZones())
+		if (rtData.getInCycle() >= parms.getZones())
 		{
 			// either no watering required or one zone made current to watering. 
 			// so... either we're done or a new cycle starts
@@ -294,31 +307,51 @@ public class Watering {
 			logger.debug("Next start time set to " + rtData.getNextStartTime());
 			rtData.setForceManual(false);
 			rtData.setLastWateringSession(rtData.getNextStartTimeAsDate());
-			inCycle = -1;
 			rtData.setInCycle(-1);
 			return false;
 		}
 		
 		if(newCycleStarting)
-		{
-			if ((rtData.getMode().compareTo("manual") == 0) && !rtData.isForceManual())
+		{	
+			// It's a fresh start. We need to open-up the first valve in order to get it running.
+			logger.debug("It seems time to start a new cycle or forced to do it manually");
+			logger.debug("Start watering zone " + rtData.getInCycle() + " for " + parms.getDuration(rtData, dayOfTheWeek) + " sec");
+			int expDurations = -1;
+			for(int i = 0; i < parms.getZones(); i++)
 			{
-				// mode is set to manual but no force manual is requested.
-				// stay there
-				;
+				expDurations = parms.getDurations()[i][rtData.getNextStartIdx()][dayOfTheWeek] * 60;
+				rtData.setWateringTimeTarget(i, expDurations);
 			}
-			else
+			logger.debug("Watering zone " + rtData.getInCycle() + 
+						 " for " + rtData.getWateringTimeTarget(rtData.getInCycle()) + " sec");
+			newCycleStarting = false;
+			for(int i = 0; i < parms.getZones(); i++)
 			{
-				rtData.setLastWateringSession(now);
-				
-				// It's a fresh start. We need to open-up the first valve in order to get it running.
-				logger.debug("It seems time to start a new cycle or forced to do it manually");
-				logger.debug("Start watering zone " + inCycle + " for " + parms.getDuration(rtData, dayOfTheWeek) + " sec");
-				rtData.setValveStatus(inCycle, true);
-				logger.debug("Watering zone " + inCycle + 
-							 " for " + parms.getDurations()[inCycle][rtData.getNextStartIdx()][dayOfTheWeek] * 60 + " sec");
+				rtData.setWateringTimeElapsed(i, 0);
 			}
+			rtData.setValveStatus(rtData.getInCycle(), true);
 		}
+
+		if (rtData.getWateringTimeElapsed(rtData.getInCycle()) >= rtData.getWateringTimeTarget(rtData.getInCycle()))
+		{
+			logger.trace("The area " + rtData.getInCycle() + " watering has been completed");
+			rtData.setValveStatus(rtData.getInCycle(), false);
+			rtData.setWateringTimeTarget(rtData.getInCycle(), 0);
+			// being in cycle, get the next zone for which a duration > 0 is set 
+			rtData.setInCycle(rtData.getInCycle() + 1);
+			while((rtData.getInCycle() < parms.getZones()) && (parms.getDuration(rtData, dayOfTheWeek) == 0))
+			{
+				rtData.setInCycle(rtData.getInCycle() + 1);
+			}
+			logger.debug("the next area to water is " + rtData.getInCycle());
+		}
+		
+		if ((rtData.getInCycle() < parms.getZones()) && !rtData.getValveStatus(rtData.getInCycle()))
+		{
+			logger.debug("opening the area valve");
+			rtData.setValveStatus(rtData.getInCycle(), true);
+		}
+		
 		return true;
 	}
 	

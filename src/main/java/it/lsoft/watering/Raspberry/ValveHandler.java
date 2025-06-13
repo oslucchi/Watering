@@ -19,7 +19,6 @@ import it.lsoft.watering.Commons.Errors;
 import it.lsoft.watering.Commons.Parameters;
 import it.lsoft.watering.DBUtils.ArchiveData;
 import it.lsoft.watering.DBUtils.History;
-import jdk.internal.org.jline.utils.Log;
 
 public class ValveHandler extends Thread implements IWateringHandler
 {

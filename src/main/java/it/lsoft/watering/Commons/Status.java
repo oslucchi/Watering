@@ -22,6 +22,7 @@ public class Status {
 	private int[] expWateringTime = null;
 	private int versionId = 0;
 	private boolean[] flags = new boolean[MNGD_FLAGS];
+	private int currentArea = -1;
 	
 	public Status(Parameters parms) {
 		moisture = new double[parms.getNumberOfSensors()];
@@ -39,7 +40,8 @@ public class Status {
          	   Objects.equals(moisture, other.moisture) &&
          	   Objects.equals(watering, other.watering) &&
          	   Objects.equals(curWateringTime, other.curWateringTime) &&
-         	   Objects.equals(expWateringTime, other.expWateringTime);
+         	   Objects.equals(expWateringTime, other.expWateringTime) &&
+         	   Objects.equals(currentArea, other);
     }
     
     public Date getNextStart() {
@@ -96,5 +98,13 @@ public class Status {
 
 	public void setVersionId(int versionId) {
 		this.versionId = versionId;
+	}
+
+	public int getCurrentArea() {
+		return currentArea;
+	}
+
+	public void setCurrentArea(int currentArea) {
+		this.currentArea = currentArea;
 	}
 }

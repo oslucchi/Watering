@@ -208,7 +208,11 @@ public class AdminCommands extends Thread implements IWateringHandler
 									wr.write("malformatted delay '" + inputParm + "\n");
 								}
 							}
-
+							break;
+							
+		                case "stopman":
+		                    rtData.setSkipCycleFlag(true);
+							wr.write("ACK\n");
 							break;
 							
 						case "start":
