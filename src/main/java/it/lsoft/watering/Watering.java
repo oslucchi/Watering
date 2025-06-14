@@ -317,9 +317,10 @@ public class Watering {
 			logger.debug("It seems time to start a new cycle or forced to do it manually");
 			logger.debug("Start watering zone " + rtData.getInCycle() + " for " + parms.getDuration(rtData, dayOfTheWeek) + " sec");
 			int expDurations = -1;
+			int startIdx = rtData.getNextStartIdx();
 			for(int i = 0; i < parms.getZones(); i++)
 			{
-				expDurations = parms.getDurations()[i][rtData.getNextStartIdx()][dayOfTheWeek] * 60;
+				expDurations = parms.getDurations()[i][startIdx][dayOfTheWeek] * 60;
 				rtData.setWateringTimeTarget(i, expDurations);
 			}
 			logger.debug("Watering zone " + rtData.getInCycle() + 

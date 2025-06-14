@@ -42,6 +42,7 @@ public class Parameters
 	private boolean useMoistureSensor = true;
 	private boolean adminViaSocket = true;
 	private int adminPort;
+	private int webAdminPort;
 	private int highValue = 1;
 	private int resetBtn;
 	private String[] schedule;
@@ -186,6 +187,7 @@ public class Parameters
 		archiveEvery = Integer.parseInt(ini.get("persistance", "archiveEvery"));
 		dbHost = ini.get("persistance", "dbHost");
 		adminPort = Integer.parseInt(ini.get("admin", "adminPort"));
+		webAdminPort = Integer.parseInt(ini.get("admin", "webAdminPort"));
 		resetBtn = Integer.parseInt(ini.get("io", "resetBtn"));
 
 		skipTreshold = new double[numberOfSensors];
@@ -488,6 +490,10 @@ public class Parameters
 
 	public String getRunMode() {
 		return runMode;
+	}
+
+	public int getWebAdminPort() {
+		return webAdminPort;
 	}
 	
 }

@@ -18,7 +18,6 @@ import java.net.Socket;
 import org.apache.log4j.Logger;
 
 public class JsonAdminCommands extends Thread implements IWateringHandler {
-    private static final int JSON_PORT = 9899;
     private ServerSocket serverSocket = null;
     private final RealTimeData rtData;
     private final Parameters parms;
@@ -34,8 +33,8 @@ public class JsonAdminCommands extends Thread implements IWateringHandler {
         this.gson = new Gson();
         
         try {
-            serverSocket = new ServerSocket(JSON_PORT);
-            logger.info("JSON TCP interface listening on port " + JSON_PORT);
+            serverSocket = new ServerSocket(parms.getWebAdminPort());
+            logger.info("JSON TCP interface listening on port " + parms.getWebAdminPort());
         } catch (IOException e) {
             logger.fatal("Exception " + e.getMessage() + " on JSON ServerSocket creation");
             rtData.setShutDown(true);
@@ -114,6 +113,7 @@ public class JsonAdminCommands extends Thread implements IWateringHandler {
                         
                         // Reload configuration
                         rtData.setParms(parms.rescan());
+    					rtData.evalFirstStart();
                         
                         return new JsonResponse(JsonResponse.Status.OK, 
                             "Configuration saved and reloaded. Backup created: " + backupFile);
@@ -122,6 +122,12 @@ public class JsonAdminCommands extends Thread implements IWateringHandler {
                         return new JsonResponse(JsonResponse.Status.NOK, 
                             "Error saving configuration file: " + e.getMessage());
                     }
+
+                case "rescan":
+					rtData.setParms(parms.rescan());
+					rtData.evalFirstStart();
+                    return new JsonResponse(JsonResponse.Status.OK, null);
+
 
                 case "status":
                 	Status s = new Status(parms);
@@ -259,7 +265,7 @@ public class JsonAdminCommands extends Thread implements IWateringHandler {
                         return new JsonResponse(JsonResponse.Status.NOK, 
                             "Malformatted zone parameter: " + command.getParameters()[0]);
                     }
-
+                    
                 default:
                     return new JsonResponse(JsonResponse.Status.NOK, "Unknown command");
             }
