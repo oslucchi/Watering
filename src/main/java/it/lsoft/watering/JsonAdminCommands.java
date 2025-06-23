@@ -215,19 +215,25 @@ public class JsonAdminCommands extends Thread implements IWateringHandler {
                         return new JsonResponse(JsonResponse.Status.NOK, "Mode parameter required (a/m)");
                     }
                     String mode = command.getParameters()[0].toString();
+                    logger.debug("Required to switch to " + (mode.compareTo("a") == 0 ? "auto" : "manual") + 
+                    			 " from current status " + rtData.getMode());
+                    String retMessage;
                     switch (mode) {
                         case "a":
                             rtData.setMode("auto");
                             rtData.setErrorCode(rtData.getErrorCode() & 0b111111101111111111111111);
-                            String autoNextStart = "Re-evaluated next start time to " + rtData.getNextStartTime();
-                            return new JsonResponse(JsonResponse.Status.OK, autoNextStart);
+                            retMessage = "Re-evaluated next start time to " + rtData.getNextStartTime();
+                            break;
                         case "m":
                             rtData.setMode("manual");
                             rtData.setErrorCode(rtData.getErrorCode() | 0b000000010000000000000000);
-                            return new JsonResponse(JsonResponse.Status.OK, "Switched to manual mode");
+                            retMessage = "Switched to manual mode";
+                            break;
                         default:
                             return new JsonResponse(JsonResponse.Status.NOK, "Invalid mode. Use 'a' for auto or 'm' for manual");
                     }
+                    logger.debug("Mode set to " +rtData.getMode());
+                    return new JsonResponse(JsonResponse.Status.OK, retMessage);
 
                 case "skip":
                     if (command.getParameters() == null || command.getParameters().length == 0) {
